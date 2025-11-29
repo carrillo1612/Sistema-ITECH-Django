@@ -1,0 +1,412 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración de Usuarios | ITECH</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0F172A', // Azul oscuro elegante
+                        accent: '#2563EB',  // Azul brillante para acciones
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Lógica de visibilidad del Modal (Mantenida para tu JS) */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.is-visible { display: flex; }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden font-sans">
+
+    <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-20 shrink-0">
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <img src="{% static 'img/logo.JPEG' %}" alt="Logo" class="h-8 w-auto object-contain">
+                <span class="font-bold text-xl tracking-tight text-slate-900">ITECH</span>
+            </div>
+            <div class="hidden md:flex h-6 w-px bg-slate-300 mx-2"></div>
+            <span class="hidden md:block text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">
+                <i class="fas fa-headset mr-1"></i> Soporte: +52 999 456 7891
+            </span>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="text-right hidden sm:block">
+                <p class="text-sm font-semibold text-slate-700">{{ user.Nombre }} {{ user.Apellido }}</p>
+                <p class="text-xs text-slate-500">{{ user.Rol }}</p>
+            </div>
+            <div class="h-10 w-10 bg-accent/10 rounded-full flex items-center justify-center text-accent font-bold border border-accent/20">
+                {{ user.Nombre|slice:":1" }}{{ user.Apellido|slice:":1" }}
+            </div>
+            <a href="{% url 'logout' %}" class="ml-2 text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-colors" title="Cerrar Sesión">
+                <i class="fas fa-sign-out-alt text-lg"></i>
+            </a>
+        </div>
+    </nav>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <aside class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10">
+            <div class="p-6">
+                <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4">Menú Principal</p>
+                <nav class="space-y-1">
+    
+    <a href="{% url 'vista_calendario' %}" 
+       class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
+        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
+    </a>
+
+     <a href="{% url 'lista_ordenes' %}" 
+       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
+    </a>
+    
+    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
+    <a href="{% url 'lista_reportes_pendientes' %}" 
+       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
+    </a>
+    {% endif %}
+
+    {% if request.user.Rol == 'Administrador' %}
+    
+    <a href="{% url 'lista_clientes' %}" 
+       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
+    </a>
+
+
+    <a href="{% url 'gestion_usuarios' %}" 
+       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
+    </a>
+    {% endif %}
+
+</nav>
+            </div>
+            <div class="mt-auto p-6 border-t border-slate-800">
+                <p class="text-xs text-center text-slate-600">&copy; 2024 ITECH System</p>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50">
+            
+            <div class="px-8 py-6 pb-2 shrink-0">
+                <div class="flex items-center gap-3 mb-1">
+                    <div class="p-2 bg-blue-100 text-accent rounded-lg">
+                        <i class="fas fa-users-cog text-xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-slate-800">Administración de Usuarios</h1>
+                </div>
+                <p class="text-slate-500 text-sm ml-12">Gestiona el acceso, roles y permisos del personal del sistema.</p>
+            </div>
+
+            <div class="flex-1 p-6 sm:px-8 pt-4 overflow-y-auto custom-scrollbar">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden h-full">
+                    
+                    <div class="p-4 border-b border-slate-200 bg-white flex flex-wrap justify-between items-center gap-4">
+                        
+                        <div class="flex items-center gap-3 text-sm text-slate-600">
+                            <div class="flex items-center gap-2 border-r border-slate-200 pr-3 mr-1">
+                                <span>Mostrar</span>
+                                <select class="bg-slate-50 border border-slate-300 rounded px-2 py-1 focus:outline-none focus:border-accent">
+                                    <option>15</option>
+                                    <option>30</option>
+                                    <option>50</option>
+                                </select>
+                                <span>registros</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <button id="btn_nuevo_usuario" class="bg-accent hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm shadow-blue-500/30 flex items-center gap-2">
+                                <i class="fas fa-plus"></i> Nuevo Usuario
+                            </button>
+                            
+                            <form method="GET" action="{% url 'gestion_usuarios' %}" class="relative">
+    
+    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+        <i class="fas fa-search"></i>
+    </span>
+    
+    <input type="text" 
+           name="q" 
+           id="search-input" 
+           placeholder="Buscar usuario..." 
+           value="{{ request.GET.q|default:'' }}" 
+           class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none w-48 transition-all focus:w-64">
+    
+</form>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-auto">
+                        <table class="w-full text-sm text-left text-slate-600">
+                            <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-6 py-3 border-b border-slate-200 w-16">ID</th>
+                                    <th class="px-6 py-3 border-b border-slate-200">Nombre Completo</th>
+                                    <th class="px-6 py-3 border-b border-slate-200">Correo</th>
+                                    <th class="px-6 py-3 border-b border-slate-200 w-32">Rol</th>
+                                    <th class="px-6 py-3 border-b border-slate-200 w-24">Estado</th>
+                                    <th class="px-6 py-3 border-b border-slate-200 w-24 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                {% for usuario in lista_usuarios %}
+                                <tr class="hover:bg-slate-50 transition-colors group">
+                                    <td class="px-6 py-3 font-mono text-xs font-bold text-slate-500 bg-slate-50/50">
+                                        {{ usuario.UsuarioID }}
+                                    </td>
+                                    <td class="px-6 py-3 font-medium text-slate-800">
+                                        {{ usuario.Nombre }} {{ usuario.Apellido }}
+                                    </td>
+                                    <td class="px-6 py-3 text-slate-500">
+                                        {{ usuario.CorreoElectronico }}
+                                    </td>
+                                    <td class="px-6 py-3">
+                                        {% if usuario.Rol == 'Administrador' %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                {{ usuario.Rol }}
+                                            </span>
+                                        {% elif usuario.Rol == 'Soporte' %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                {{ usuario.Rol }}
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+                                                {{ usuario.Rol|default:'Usuario' }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-3">
+                                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Activo
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-3 text-center flex justify-center gap-2">
+                                        <a href="{% url 'editar_usuario' usuario.UsuarioID %}" class="text-slate-400 hover:text-accent transition-colors" title="Editar">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        <form action="{% url 'eliminar_usuario' usuario.UsuarioID %}" method="POST" class="inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="text-slate-400 hover:text-red-500 transition-colors" 
+                                                    onclick="return confirm('¿Estás seguro de que deseas eliminar a {{ usuario.Nombre }} {{ usuario.Apellido }}?');"
+                                                    title="Eliminar">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3 text-slate-300">
+                                                <i class="fas fa-user-slash text-3xl"></i>
+                                            </div>
+                                            <p>No hay usuarios registrados en el sistema.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal_usuario" class="modal">
+        <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-lg flex flex-col transform transition-all">
+            
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 rounded-t-xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-accent">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">
+                            {% if usuario_a_editar %}Editar Usuario{% else %}Crear Nuevo Usuario{% endif %}
+                        </h3>
+                        <p class="text-xs text-slate-500">Información de acceso y perfil</p>
+                    </div>
+                </div>
+                <button class="text-slate-400 hover:text-slate-600 text-2xl leading-none outline-none" data-close-modal>&times;</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto">
+                
+                {% if usuario_a_editar %}
+                    <form id="form_usuario" method="POST" action="{% url 'editar_usuario' usuario_a_editar.UsuarioID %}">
+                {% else %}
+                    <form id="form_usuario" method="POST" action="{% url 'gestion_usuarios' %}">
+                {% endif %}
+                    {% csrf_token %}
+                    
+                    {% if form_usuario.non_field_errors %}
+                        <div class="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
+                            {{ form_usuario.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre(s)</label>
+                            <input type="text" name="{{ form_usuario.Nombre.name }}" value="{{ form_usuario.Nombre.value|default:'' }}" 
+                                   class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                                   required>
+                            {% if form_usuario.Nombre.errors %}<p class="text-red-500 text-xs mt-1">{{ form_usuario.Nombre.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Apellido(s)</label>
+                            <input type="text" name="{{ form_usuario.Apellido.name }}" value="{{ form_usuario.Apellido.value|default:'' }}" 
+                                   class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                                   required>
+                            {% if form_usuario.Apellido.errors %}<p class="text-red-500 text-xs mt-1">{{ form_usuario.Apellido.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Teléfono</label>
+                        <input type="text" name="{{ form_usuario.NumeroTelefono.name }}" value="{{ form_usuario.NumeroTelefono.value|default:'' }}" 
+                               class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                               required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Correo Electrónico (Login)</label>
+                        <input type="email" name="{{ form_usuario.CorreoElectronico.name }}" value="{{ form_usuario.CorreoElectronico.value|default:'' }}" 
+                               class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                               required>
+                        {% if form_usuario.CorreoElectronico.errors %}<p class="text-red-500 text-xs mt-1">{{ form_usuario.CorreoElectronico.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        
+                        <div>
+                            <label for="{{ form_usuario.Rol.id_for_label }}" class="block text-xs font-bold text-slate-600 uppercase mb-1">
+                                Rol <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <select name="{{ form_usuario.Rol.name }}" 
+                                        id="{{ form_usuario.Rol.id_for_label }}" 
+                                        required
+                                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent appearance-none cursor-pointer">
+                                    
+                                    <option value="" disabled {% if not usuario_a_editar %}selected{% endif %}>
+                                        ---------
+                                    </option>
+
+                                    {% for value, label in form_usuario.Rol.field.choices %}
+                                        {% if value %}
+                                            <option value="{{ value }}" 
+                                                {% if usuario_a_editar and form_usuario.Rol.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                
+                                <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none"></i>
+                            </div>
+                            {% if form_usuario.Rol.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ form_usuario.Rol.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">
+                                Contraseña <span class="text-red-500">{% if not usuario_a_editar %}*{% endif %}</span>
+                            </label>
+                            <input type="password" name="{{ form_usuario.password.name }}" 
+                                   class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                                   {% if not usuario_a_editar %}required{% endif %}>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 rounded-b-xl">
+                <button type="button" data-close-modal class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-white hover:text-slate-800 transition font-medium text-sm">Cancelar</button>
+                <button type="submit" form="form_usuario" class="px-6 py-2 rounded-lg bg-accent text-white hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition font-medium text-sm">Guardar Usuario</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnNuevo = document.getElementById('btn_nuevo_usuario');
+            const modal = document.getElementById('modal_usuario');
+            const closeButtons = document.querySelectorAll('[data-close-modal]');
+            const form = document.getElementById('form_usuario');
+
+            function openModal() {
+                modal.classList.add('is-visible');
+            }
+
+            function closeModal() {
+                modal.classList.remove('is-visible');
+                if(form) form.reset();
+                // Limpiar URL si es necesario
+                window.history.pushState({}, '', '/gestion_usuarios/'); 
+            }
+
+            if(btnNuevo) btnNuevo.onclick = openModal;
+
+            closeButtons.forEach(button => {
+                button.onclick = closeModal;
+            });
+
+            window.onclick = function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            };
+
+            // Si estamos en modo edición (el backend mandó un usuario)
+            {% if usuario_a_editar %}
+                openModal();
+            {% endif %}
+        });
+    </script>
+</body>
+</html>

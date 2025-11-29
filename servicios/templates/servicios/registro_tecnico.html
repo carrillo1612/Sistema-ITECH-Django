@@ -1,0 +1,982 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Servicio | ITECH</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0F172A', // Azul oscuro elegante
+                        accent: '#2563EB',  // Azul brillante para acciones
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos específicos que Tailwind no cubre fácilmente o para mantener lógica del canvas */
+        .signature-canvas {
+            touch-action: none;
+            cursor: crosshair;
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* Scrollbar personalizada sutil */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* --- ESTILOS PARA LA GESTIÓN DE FOTOS (Borrado) --- */
+        .image-preview-item {
+            position: relative;
+        }
+        .remove-photo-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            z-index: 20;
+            background-color: rgba(220, 38, 38, 0.9); /* Rojo semitransparente */
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid white;
+            transition: background-color 0.2s;
+        }
+        .remove-photo-btn:hover {
+            background-color: rgb(185, 28, 28);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden font-sans">
+
+    <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-20 shrink-0">
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <img src="{% static 'img/logo.JPEG' %}" alt="Logo" class="h-8 w-auto object-contain">
+                <span class="font-bold text-xl tracking-tight text-slate-900">ITECH</span>
+            </div>
+            <div class="hidden md:flex h-6 w-px bg-slate-300 mx-2"></div>
+            <span class="hidden md:block text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">
+                <i class="fas fa-headset mr-1"></i> Soporte: +52 999 456 7891
+            </span>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="text-right hidden sm:block">
+                <p class="text-sm font-semibold text-slate-700">{{ user.Nombre }} {{ user.Apellido }}</p>
+                <p class="text-xs text-slate-500">Técnico</p>
+            </div>
+            <div class="h-10 w-10 bg-accent/10 rounded-full flex items-center justify-center text-accent font-bold border border-accent/20">
+                {{ user.Nombre|slice:":1" }}{{ user.Apellido|slice:":1" }}
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <aside class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10">
+            <div class="p-6">
+                <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4">Menú Principal</p>
+                <nav class="space-y-1">
+    
+    <a href="{% url 'vista_calendario' %}" 
+        class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
+        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
+    </a>
+
+      <a href="{% url 'lista_ordenes' %}" 
+        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
+    </a>
+    
+    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
+    <a href="{% url 'lista_reportes_pendientes' %}" 
+        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
+    </a>
+    {% endif %}
+
+    {% if request.user.Rol == 'Administrador' %}
+    
+    <a href="{% url 'lista_clientes' %}" 
+        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
+    </a>
+
+
+    <a href="{% url 'gestion_usuarios' %}" 
+        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
+    </a>
+    {% endif %}
+
+</nav>
+            </div>
+            <div class="mt-auto p-6 border-t border-slate-800">
+                <p class="text-xs text-center text-slate-600">&copy; 2024 ITECH System</p>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50">
+            
+            <div class="px-8 py-6 pb-2 shrink-0">
+                <div class="flex items-center gap-3 mb-1">
+                    <div class="p-2 bg-blue-100 text-accent rounded-lg">
+                        <i class="fas fa-clipboard-list text-xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-slate-800">Registro Técnico de Servicio</h1>
+                </div>
+                <p class="text-slate-500 text-sm ml-12">Complete los detalles técnicos, observaciones y recabe las firmas.</p>
+            </div>
+
+            <div class="flex-1 p-6 sm:px-8 pt-4 overflow-hidden flex flex-col">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden">
+                    
+                    <div class="border-b border-slate-200 px-6 pt-2 shrink-0 bg-slate-50">
+                        <div class="flex space-x-8">
+                            <button id="tab-btn-datos" onclick="switchTab('datos-tecnicos')" class="tab-btn group active pb-3 pt-2 text-sm font-medium border-b-2 border-accent text-accent">
+                                <i class="fas fa-server mr-2 opacity-70"></i>Datos Técnicos
+                            </button>
+                            <button id="tab-btn-observaciones" onclick="switchTab('observaciones')" class="tab-btn group pb-3 pt-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-all">
+                                <i class="fas fa-edit mr-2 opacity-70"></i>Observaciones
+                            </button>
+                            <button id="tab-btn-reporte" onclick="switchTab('reporte')" class="tab-btn group pb-3 pt-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-all">
+                                <i class="fas fa-file-signature mr-2 opacity-70"></i>Evidencia y Firmas
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto p-6 sm:p-8 custom-scrollbar">
+                        <form id="hvacForm" class="space-y-8 max-w-6xl mx-auto">
+                            {% csrf_token %}
+                            <input type="hidden" name="orden_id" value="{{ orden.pk }}">
+
+                            <div id="tab-datos-tecnicos" data-content="datos-tecnicos" class="animate-fade-in-up">
+                                
+                                <section class="mb-10">
+                                    <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+                                        <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-accent font-bold text-sm">1</span>
+                                        <h3 class="text-lg font-semibold text-slate-800">Información del Equipo</h3>
+                                    </div>
+                                    
+                                    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        <div class="group">
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Tipo de Unidad <span class="text-red-500">*</span></label>
+                                            <div class="relative">
+                                                <select id="tipoUnidad" name="tipoUnidad" required class="w-full pl-3 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all appearance-none">
+                                                    <option value="" disabled selected>Seleccione...</option>
+                                                    <option value="Sistemassplits">Sistemas Splits</option>
+                                                    <option value="Ventana">Ventana</option>
+                                                    <option value="Paquete">Paquete</option>
+                                                    <option value="Fancoil">Fan & Coil</option>
+                                                    <option value="Cassete">Cassete</option>
+                                                    <option value="Floorstanding">Floor standing</option>
+                                                    <option value="PisoTecho">Piso Techo</option>
+                                                    <option value="Chiller">Chiller</option>
+                                                    <option value="vrf">Vrf</option>
+                                                    <option value="Airesprecisión">Aires de precisión</option>
+                                                    <option value="Contenedorreefer">Contenedores reefer</option>
+                                                    <option value="UnidadesKing">Unidades thermo King</option>
+                                                </select>
+                                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500"><i class="fas fa-chevron-down text-xs"></i></div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Marca <span class="text-red-500">*</span></label>
+                                            <input type="text" id="marca" name="marca" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all" placeholder="Ej: Carrier">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Modelo <span class="text-red-500">*</span></label>
+                                            <input type="text" id="modelo" name="modelo" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Capacidad <span class="text-red-500">*</span></label>
+                                            <input type="text" id="capacidad" name="capacidad" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Tipo Gas Refrig. <span class="text-red-500">*</span></label>
+                                            <input type="text" id="tipoGas" name="tipoGas" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Instalación Condensador</label>
+                                            <div class="relative">
+                                                <select id="condensador" name="condensador" required class="w-full pl-3 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all appearance-none">
+                                                    <option value="" disabled selected>Seleccione...</option>
+                                                    <option value="Mensulas">Ménsulas</option>
+                                                    <option value="Piso">Piso</option>
+                                                    <option value="Techo">Techo</option>
+                                                </select>
+                                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500"><i class="fas fa-chevron-down text-xs"></i></div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Servicio Realizado</label>
+                                            <div class="relative">
+                                                <select id="servicio" name="servicio" required class="w-full pl-3 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all appearance-none">
+                                                    <option value="" disabled selected>Seleccione...</option>
+                                                    <option value="Mantenimiento">Mantenimiento</option>
+                                                    <option value="Revision">Revisión</option>
+                                                    <option value="Reparacion">Reparación</option>
+                                                    <option value="Instalacion">Instalación</option>
+                                                    <option value="Diagnostico">Diagnóstico</option>
+                                                    <option value="Garantia">Garantía</option>
+                                                </select>
+                                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500"><i class="fas fa-chevron-down text-xs"></i></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="mb-10">
+                                    <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+                                        <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-accent font-bold text-sm">2</span>
+                                        <h3 class="text-lg font-semibold text-slate-800">Parámetros de Instalación</h3>
+                                    </div>
+                                    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Distancia Evap-Cond (m) <span class="text-red-500">*</span></label>
+                                            <input type="number" id="distanciaEvapCond" name="distanciaEvapCond" value="4" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Dist. Alimentación (m)</label>
+                                            <input type="number" id="distanciaAlimentacion" name="distanciaAlimentacion" value="3" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Calibre Cableado</label>
+                                            <input type="text" id="calibreAlimentacion" name="calibreAlimentacion" placeholder="Ej: 12 AWG" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Tamaño Habitación (m²)</label>
+                                            <input type="number" id="tamanoHabitacion" name="tamanoHabitacion" value="12" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Ubicación Desagüe</label>
+                                            <input type="text" id="desague" name="desague" value="Jardín" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="mb-10">
+                                    <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+                                        <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-accent font-bold text-sm">3</span>
+                                        <h3 class="text-lg font-semibold text-slate-800">Lecturas Técnicas</h3>
+                                    </div>
+                                    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Presión Gas (PSI) <span class="text-red-500">*</span></label>
+                                            <input type="number" id="presionGas" name="presionGas" value="45" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Voltaje Alim. (V)</label>
+                                            <input type="number" id="voltajeAlimentacion" name="voltajeAlimentacion" value="115" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Voltaje Terminales (V)</label>
+                                            <input type="number" id="voltajeTerminales" name="voltajeTerminales" value="112" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Temp. Habitación (°C)</label>
+                                            <input type="number" id="tempHabitacion" name="tempHabitacion" placeholder="Ej: 24" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Temp. Descarga (°C)</label>
+                                            <input type="number" id="tempDescarga" name="tempDescarga" placeholder="Ej: 8" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Bomba de Vacío (CFM)</label>
+                                            <input type="number" id="bombaCFM" name="bombaCFM" value="3" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Tiempo Vacío (Min)</label>
+                                            <input type="number" id="bombaTiempo" name="bombaTiempo" value="30" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+                                        <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-accent font-bold text-sm">4</span>
+                                        <h3 class="text-lg font-semibold text-slate-800">Comparativa de Componentes</h3>
+                                    </div>
+                                    
+                                    <div class="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                                        <table class="w-full text-sm text-left text-slate-600">
+                                            <thead class="bg-slate-100 text-xs text-slate-700 uppercase">
+                                                <tr>
+                                                    <th class="px-6 py-3 font-semibold w-1/3">Componente</th>
+                                                    <th class="px-6 py-3 font-semibold">Valor Original</th>
+                                                    <th class="px-6 py-3 font-semibold">Valor Actual</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-slate-200">
+                                                <tr class="hover:bg-white transition-colors">
+                                                    <td class="px-6 py-3 font-medium text-slate-900">Capacitor Compresor</td>
+                                                    <td class="px-6 py-2"><input type="text" id="capCompOriginal" name="capCompOriginal" placeholder="uF" required class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
+                                                    <td class="px-6 py-2"><input type="text" id="capCompActual" name="capCompActual" placeholder="uF" required class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
+                                                </tr>
+                                                <tr class="hover:bg-white transition-colors">
+                                                    <td class="px-6 py-3 font-medium text-slate-900">Capacitor Ventilador</td>
+                                                    <td class="px-6 py-2"><input type="text" id="capVentOriginal" name="capVentOriginal" placeholder="uF" required class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
+                                                    <td class="px-6 py-2"><input type="text" id="capVentActual" name="capVentActual" placeholder="uF" required class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
+                                                </tr>
+                                                <tr class="hover:bg-white transition-colors">
+                                                    <td class="px-6 py-3 font-medium text-slate-900">Amperaje Compresor</td>
+                                                    <td class="px-6 py-2"><input type="number" step="0.1" id="ampCompOriginal" name="ampCompOriginal" placeholder="FLA" required class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
+                                                    <td class="px-6 py-2"><input type="number" step="0.1" id="ampCompActual" name="ampCompActual" placeholder="A" required class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
+                                                </tr>
+                                                <tr class="hover:bg-white transition-colors">
+                                                    <td class="px-6 py-3 font-medium text-slate-900">Sensor de Pozo</td>
+                                                    <td class="px-6 py-2"><input type="text" id="sensorPozoOriginal" name="sensorPozoOriginal" placeholder="Ohms" required class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
+                                                    <td class="px-6 py-2"><input type="text" id="sensorPozoActual" name="sensorPozoActual" placeholder="Reemplazo" required class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
+                                                </tr>
+                                                <tr class="hover:bg-white transition-colors">
+                                                    <td class="px-6 py-3 font-medium text-slate-900">Sensor de Ambiente</td>
+                                                    <td class="px-6 py-2"><input type="text" id="sensorAmbienteOriginal" name="sensorAmbienteOriginal" placeholder="Ohms" required class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
+                                                    <td class="px-6 py-2"><input type="text" id="sensorAmbienteActual" name="sensorAmbienteActual" placeholder="Reemplazo" required class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <div id="tab-observaciones" data-content="observaciones" class="hidden animate-fade-in-up">
+                                <div class="bg-blue-50/50 rounded-lg p-6 border border-blue-100 mb-6">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h3 class="text-lg font-bold text-slate-800">Bitácora de Servicio</h3>
+                                        <span class="text-xs font-mono text-slate-400">MAX: 6000 CAR.</span>
+                                    </div>
+
+                                    <div class="bg-white border border-slate-200 rounded-t-lg p-2 flex gap-2 border-b-0">
+                                        <button type="button" class="p-1.5 rounded hover:bg-slate-100 text-slate-600 font-bold w-8">B</button>
+                                        <button type="button" class="p-1.5 rounded hover:bg-slate-100 text-slate-600 italic w-8">I</button>
+                                        <button type="button" class="p-1.5 rounded hover:bg-slate-100 text-slate-600 underline w-8">U</button>
+                                        <div class="w-px bg-slate-300 mx-1"></div>
+                                        <button type="button" class="p-1.5 rounded hover:bg-slate-100 text-slate-600"><i class="fas fa-list-ul"></i></button>
+                                        <button type="button" class="p-1.5 rounded hover:bg-slate-100 text-slate-600"><i class="fas fa-list-ol"></i></button>
+                                    </div>
+                                    <textarea id="observacionesTexto" name="observacionesTexto" rows="12" maxlength="6000" required class="w-full p-4 border border-slate-200 rounded-b-lg text-sm text-slate-700 focus:ring-2 focus:ring-accent/20 focus:border-accent focus:outline-none resize-y" placeholder="Describa aquí el diagnóstico detallado, materiales usados no listados y el estado final del equipo..."></textarea>
+                                </div>
+
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">Nivel de Satisfacción (Feedback)</label>
+                                        <div class="relative">
+                                            <select id="satisfaccion" name="satisfaccion" required class="w-full pl-3 pr-10 py-3 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-accent/20 focus:border-accent appearance-none">
+                                                <option value="" disabled selected>Califique el servicio...</option>
+                                                <option value="10">⭐⭐⭐⭐⭐ - Excelente (10)</option>
+                                                <option value="9">⭐⭐⭐⭐ - Muy Bueno (9)</option>
+                                                <option value="8">⭐⭐⭐ - Bueno (8)</option>
+                                                <option value="7">⭐⭐ - Regular (7)</option>
+                                                <option value="5">⭐ - Neutral (5)</option>
+                                                <option value="1">⚠️ - Pésimo (1)</option>
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500"><i class="fas fa-chevron-down text-xs"></i></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">Comentario Cliente (Resumen)</label>
+                                        <textarea id="comentarioCliente" name="comentarioCliente" rows="2" required class="w-full p-3 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-accent/20 focus:border-accent focus:outline-none" placeholder="El cliente menciona que..."></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6">
+                                    <label class="block text-sm font-semibold text-slate-700 mb-2 text-yellow-600"><i class="fas fa-lock mr-1"></i> Notas Internas (Solo ITECH)</label>
+                                    <textarea id="notasInternas" name="notasInternas" rows="2" required class="w-full p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm focus:ring-2 focus:ring-yellow-400/20 focus:border-yellow-400 focus:outline-none" placeholder="Notas para administración..."></textarea>
+                                </div>
+                            </div>
+
+                            <div id="tab-reporte" data-content="reporte" class="hidden animate-fade-in-up">
+                                
+                                <section class="mb-10">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="text-lg font-bold text-slate-800">Evidencia Fotográfica</h3>
+                                        <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded">Máx. 12 fotos</span> </div>
+                                    
+                                    <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:bg-slate-50 transition-colors relative cursor-pointer group">
+                                        <input type="file" id="photoUpload" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                        <div class="space-y-2">
+                                            <div class="w-12 h-12 bg-blue-50 text-accent rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                                                <i class="fas fa-camera text-xl"></i>
+                                            </div>
+                                            <p class="text-sm font-medium text-slate-700">Arrastra fotos o haz clic para subir</p>
+                                            <p class="text-xs text-slate-400">Soporta JPG, PNG</p>
+                                        </div>
+                                    </div>
+
+                                    <div id="photoPreview" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mt-6">
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h3 class="text-lg font-bold text-slate-800 mb-6">Conformidad del Servicio</h3>
+                                    <div class="grid md:grid-cols-2 gap-8">
+                                        
+                                        <div class="bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+                                            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 flex justify-between items-center rounded-t-lg">
+                                                <label class="text-sm font-bold text-slate-700">Firma del Cliente</label>
+                                                <i class="fas fa-pen-nib text-slate-400 text-xs"></i>
+                                            </div>
+                                            <div class="p-4 bg-white flex justify-center">
+                                                <canvas id="signatureCliente" class="signature-canvas border border-slate-200 rounded-lg w-full" style="max-width: 100%; height: 150px;"></canvas>
+                                            </div>
+                                            <div class="px-4 py-3 bg-slate-50 border-t border-slate-100 flex justify-end gap-2 rounded-b-lg">
+                                                <button type="button" onclick="clearSignature('signatureCliente')" class="text-xs px-3 py-1.5 bg-white border border-red-200 text-red-600 rounded hover:bg-red-50 transition">Borrar</button>
+                                                <button type="button" onclick="saveSignature('signatureCliente')" class="text-xs px-3 py-1.5 bg-slate-800 text-white rounded hover:bg-slate-700 transition shadow-sm"><i class="fas fa-check mr-1"></i>Confirmar</button>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+                                            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 flex justify-between items-center rounded-t-lg">
+                                                <label class="text-sm font-bold text-slate-700">Firma del Técnico</label>
+                                                <i class="fas fa-user-shield text-slate-400 text-xs"></i>
+                                            </div>
+                                            <div class="p-4 bg-white flex justify-center">
+                                                <canvas id="signatureTecnico" class="signature-canvas border border-slate-200 rounded-lg w-full" style="max-width: 100%; height: 150px;"></canvas>
+                                            </div>
+                                            <div class="px-4 py-3 bg-slate-50 border-t border-slate-100 flex justify-end gap-2 rounded-b-lg">
+                                                <button type="button" onclick="clearSignature('signatureTecnico')" class="text-xs px-3 py-1.5 bg-white border border-red-200 text-red-600 rounded hover:bg-red-50 transition">Borrar</button>
+                                                <button type="button" onclick="saveSignature('signatureTecnico')" class="text-xs px-3 py-1.5 bg-slate-800 text-white rounded hover:bg-slate-700 transition shadow-sm"><i class="fas fa-check mr-1"></i>Confirmar</button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </section>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="bg-white border-t border-slate-200 p-4 shrink-0 flex items-center justify-between z-10">
+                        <span class="text-xs text-slate-400 hidden sm:inline-block">Revise todos los campos antes de guardar.</span>
+                        <div class="flex gap-3 ml-auto">
+                            <button type="button" onclick="history.back()" class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-800 transition-all text-sm">
+                                Cancelar
+                            </button>
+                            <button type="button" onclick="capturarDatos()" class="px-6 py-2.5 rounded-lg bg-accent text-white font-medium hover:bg-blue-700 shadow-md shadow-blue-500/30 hover:shadow-blue-500/40 transform hover:-translate-y-0.5 transition-all text-sm flex items-center">
+                                <i class="fas fa-save mr-2"></i> Guardar Registro
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    // ====================================================================
+    // 1. VARIABLES GLOBALES
+    // ====================================================================
+
+    let materialCounter = 0;
+    const drawingState = { isDrawing: false, canvas: null, ctx: null, };
+    const uploadedFiles = []; // Almacena objetos {id, file, dataURL, description}
+    let firmaClienteDataURL = null; 
+    let firmaTecnicoDataURL = null;
+    let photoIdCounter = 0; // Contador para IDs temporales únicos
+
+
+    // FUNCIONES DE GUARDADO OFFLINE Y SINCRONIZACIÓN
+    // =========================================================
+
+    const ORDEN_KEY_PREFIX = 'registro_draft_';
+
+    function isOnline() {
+        // Verifica el estado de la conexión del navegador
+        return navigator.onLine;
+    }
+
+   function saveDraft(ordenId) {
+    const form = document.getElementById('hvacForm');
+    const data = {};
+    
+    form.querySelectorAll('input, select, textarea').forEach(element => {
+        // Excluimos todos los elementos relacionados con archivos y descripciones temporales
+        if (element.type !== 'file' && element.name && !element.name.startsWith('desc_foto_')) {
+            data[element.name] = element.value;
+        }
+    });
+
+    // 2. Incluir DataURL de firmas (Si están confirmadas)
+    if (firmaClienteDataURL) data['firma_cliente_dataurl'] = firmaClienteDataURL;
+    if (firmaTecnicoDataURL) data['firma_tecnico_dataurl'] = firmaTecnicoDataURL;
+    
+    // 🛑 IMPORTANTE: NO incluir 'uploaded_descriptions' aquí. Si lo incluyes, 
+    // el array 'uploadedFiles' debe ser mapeado, lo que puede causar el fallo.
+    // Para depuración, lo eliminaremos por completo.
+    
+    // 4. Guarda el borrador en localStorage
+    const key = ORDEN_KEY_PREFIX + ordenId;
+    localStorage.setItem(key, JSON.stringify(data));
+    
+    console.log(`Borrador guardado localmente para Orden #${ordenId}.`);
+    alert('✅ Servicio guardado en modo sin conexión. Se sincronizará al tener internet.');
+}
+    
+    function loadDraft(ordenId) {
+        const key = ORDEN_KEY_PREFIX + ordenId;
+        const storedData = localStorage.getItem(key);
+
+        if (storedData) {
+            const data = JSON.parse(storedData);
+            
+            // 1. Cargar datos en el formulario
+            for (const name in data) {
+                const element = document.querySelector(`#hvacForm [name="${name}"]`);
+                if (element && name !== 'firma_cliente_dataurl' && name !== 'firma_tecnico_dataurl') {
+                    // Carga de campos normales (input, select, textarea)
+                    element.value = data[name];
+                }
+            }
+            
+            // 2. Reestablecer firmas (muestra el anillo verde si existen)
+  if (data['firma_cliente_dataurl']) {
+    firmaClienteDataURL = data['firma_cliente_dataurl'];
+    // 💡 NECESITAS DIBUJARLA AQUÍ si quieres que se vea
+}
+if (data['firma_tecnico_dataurl']) {
+    firmaTecnicoDataURL = data['firma_tecnico_dataurl'];
+}
+            
+            // 3. Notificación de carga
+            alert(`✅ Borrador local para la Orden #${ordenId} cargado. Archivos fotográficos (si existían) deben volverse a cargar.`);
+            
+            return true; // Borrador cargado
+        }
+        return false; // No hay borrador
+    }
+
+
+    function syncAndLoadDraft(ordenId) {
+    // Esta función combina cargar el borrador y preguntar si debe sincronizar
+    const key = ORDEN_KEY_PREFIX + ordenId;
+    const storedData = localStorage.getItem(key); // Usamos storedData directamente para el chequeo inicial
+
+    if (storedData) {
+        // Solo cargamos si hay datos guardados localmente
+        const dataLoaded = loadDraft(ordenId); // loadDraft ya pone los datos en el formulario
+        
+        // Si hay borrador y estamos online, preguntamos si enviar
+        if (isOnline()) {
+            if (confirm(`¡Conexión recuperada! Hay un borrador local pendiente para la Orden #${ordenId}.\n\n¿Deseas enviar el Registro al servidor ahora?`)) {
+                // Si acepta, ejecutamos la función de envío (que limpiará el borrador si tiene éxito)
+                capturarDatos();
+            }
+        } else if (dataLoaded) {
+            // Si no hay conexión, solo notificamos que se cargó el borrador
+            // Esto es solo un mensaje de cortesía si el usuario cargó offline y se mantuvo offline
+            // El alert ya está dentro de loadDraft, pero lo dejamos como fallback
+            console.log(`Borrador local para la Orden #${ordenId} cargado.`);
+        }
+    }
+}
+
+    // ====================================================================
+    // 2. FUNCIONES DE INTERFAZ Y UTILIDAD
+    // ====================================================================
+
+    function switchTab(tabName) {
+        // Ocultar contenidos
+        document.querySelectorAll('[data-content]').forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Desactivar botones
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('border-accent', 'text-accent');
+            btn.classList.add('border-transparent', 'text-slate-500');
+        });
+
+        // Mostrar contenido seleccionado
+        const selectedContent = document.getElementById(`tab-${tabName}`);
+        if(selectedContent) selectedContent.classList.remove('hidden');
+
+        // Activar botón
+        const button = document.getElementById(`tab-btn-${tabName.split('-').pop()}`);
+        if (button) {
+            button.classList.add('border-accent', 'text-accent');
+            button.classList.remove('border-transparent', 'text-slate-500');
+        }
+        
+        // Inicializar canvas si se abre la pestaña de reporte
+        if (tabName === 'reporte') {
+            setTimeout(() => {
+                setupSignaturePad('signatureCliente');
+                setupSignaturePad('signatureTecnico');
+            }, 100); 
+        }
+    }
+
+    // Lógica del Canvas
+    function getCanvasAndContext(id) {
+        const canvas = document.getElementById(id);
+        if (!canvas) return { canvas: null, ctx: null };
+
+        if (!canvas.getAttribute('data-setup')) {
+            // Ajuste dinámico de ancho
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width - 32; // menos padding
+            canvas.height = 150;
+            canvas.setAttribute('data-setup', 'true');
+        }
+        const ctx = canvas.getContext('2d');
+        ctx.lineWidth = 2; ctx.strokeStyle = '#0F172A'; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        return { canvas, ctx };
+    }
+
+    function getCoords(e, canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+        const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function setupSignaturePad(canvasId) {
+        const { canvas, ctx } = getCanvasAndContext(canvasId);
+        if (!canvas || canvas.hasAttribute('data-listeners-attached')) return; 
+
+        const startDrawing = (e) => { 
+            if(e.type !== 'mousedown') e.preventDefault(); 
+            const { x, y } = getCoords(e, canvas); 
+            drawingState.isDrawing = true; drawingState.canvas = canvas; drawingState.ctx = ctx; 
+            ctx.beginPath(); ctx.moveTo(x, y); 
+        };
+        const draw = (e) => { 
+            if (!drawingState.isDrawing || drawingState.canvas !== canvas) return; 
+            if(e.type !== 'mousemove') e.preventDefault(); 
+            const { x, y } = getCoords(e, canvas); 
+            ctx.lineTo(x, y); ctx.stroke(); 
+        };
+        const stopDrawing = () => { if (drawingState.canvas === canvas) drawingState.isDrawing = false; };
+        
+        ['mousedown', 'touchstart'].forEach(ev => canvas.addEventListener(ev, startDrawing, { passive: false }));
+        ['mousemove', 'touchmove'].forEach(ev => canvas.addEventListener(ev, draw, { passive: false }));
+        ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(ev => canvas.addEventListener(ev, stopDrawing));
+        
+        canvas.setAttribute('data-listeners-attached', 'true');
+    }
+    
+    function saveSignature(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        
+        const dataURL = canvas.toDataURL('image/png');
+        
+        // Validamos que haya un trazo mínimo (código base >= 1500 caracteres)
+        if (dataURL.length < 1500) { 
+            if (canvasId === 'signatureCliente') firmaClienteDataURL = null;
+            else if (canvasId === 'signatureTecnico') firmaTecnicoDataURL = null;
+            
+            console.warn(`La firma ${canvasId} parece vacía o el dibujo fue insuficiente.`);
+            
+            canvas.parentElement.parentElement.classList.remove('ring-2', 'ring-green-500', 'ring-opacity-50');
+            return; 
+        }
+
+        // Si pasó el chequeo de longitud, guardamos la data y ponemos el anillo verde.
+        if (canvasId === 'signatureCliente') {
+            firmaClienteDataURL = dataURL;
+        } else if (canvasId === 'signatureTecnico') {
+            firmaTecnicoDataURL = dataURL;
+        }
+        canvas.parentElement.parentElement.classList.add('ring-2', 'ring-green-500', 'ring-opacity-50');
+    }
+
+    function clearSignature(canvasId) {
+        const { ctx, canvas } = getCanvasAndContext(canvasId);
+        if(ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        canvas.parentElement.parentElement.classList.remove('ring-2', 'ring-green-500', 'ring-opacity-50');
+
+        if (canvasId === 'signatureCliente') firmaClienteDataURL = null;
+        else if (canvasId === 'signatureTecnico') firmaTecnicoDataURL = null;
+    }
+
+    // --- FUNCIONES DE GESTIÓN DE FOTOS (12 Fotos y Borrado) ---
+
+    // Muestra las fotos y el botón de borrado
+    function renderPhotoPreview() {
+        const previewContainer = document.getElementById('photoPreview');
+        previewContainer.innerHTML = ''; // Limpia el contenedor
+
+        uploadedFiles.forEach((fileObj, index) => { // Agregamos 'index' para la descripción
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'image-preview-item flex flex-col gap-2 bg-white p-2 rounded-lg border border-slate-200 shadow-sm';
+            
+            // Botón de eliminar (X)
+            const removeBtn = document.createElement('div');
+            removeBtn.className = 'remove-photo-btn';
+            removeBtn.innerHTML = '<i class="fas fa-times text-xs"></i>';
+            removeBtn.title = 'Eliminar foto';
+            removeBtn.onclick = () => removeImage(fileObj.id); 
+
+            // Contenedor de la imagen y el botón
+            const imgContainer = document.createElement('div');
+            imgContainer.className = 'relative aspect-square rounded-md overflow-hidden bg-gray-100';
+            imgContainer.appendChild(removeBtn);
+            
+            const img = document.createElement('img');
+            img.src = fileObj.dataURL;
+            img.className = 'w-full h-full object-cover';
+            imgContainer.appendChild(img);
+
+            // Input de descripción
+            const inputDesc = document.createElement('input');
+            inputDesc.type = 'text';
+            inputDesc.value = fileObj.description;
+            inputDesc.placeholder = `Descripción Foto ${index + 1}...`; // Descripción basada en el orden
+            inputDesc.setAttribute('required', 'required'); 
+            inputDesc.className = 'w-full text-xs p-2 border border-slate-200 rounded focus:border-accent focus:outline-none transition-colors';
+            
+            // Persistir la descripción en el objeto al escribir
+            inputDesc.oninput = (e) => {
+                fileObj.description = e.target.value;
+            };
+
+            cardDiv.appendChild(imgContainer);
+            cardDiv.appendChild(inputDesc);
+            previewContainer.appendChild(cardDiv);
+        });
+    }
+
+    // Elimina la imagen del array global y re-renderiza
+    function removeImage(fileId) {
+        const index = uploadedFiles.findIndex(file => file.id === fileId);
+        if (index > -1) {
+            uploadedFiles.splice(index, 1);
+            alert('Foto eliminada. Espacio liberado.');
+            renderPhotoPreview(); // Re-renderiza para actualizar la lista visual
+        }
+    }
+
+
+    // CORRECCIÓN CLAVE: Procesa los archivos subidos, AÑADE al array y aplica el límite de 12
+    function handleImageUpload(event) {
+        const newFiles = Array.from(event.target.files);
+        const maxFiles = 12; // LÍMITE DE 12 FOTOS
+
+        // Calcular cuántas fotos más se pueden añadir.
+        const remainingSlots = maxFiles - uploadedFiles.length;
+        
+        if (remainingSlots <= 0) {
+            alert(`Advertencia: Ya has alcanzado el límite máximo de ${maxFiles} imágenes.`);
+            event.target.value = null; 
+            return;
+        }
+
+        // Solo procesar el número de archivos que caben y que son imágenes.
+        const filesToProcess = newFiles.slice(0, remainingSlots).filter(file => file.type.match('image.*')); 
+        
+        if (newFiles.length > filesToProcess.length) {
+            alert(`Advertencia: Solo se procesarán ${filesToProcess.length} imágenes. El total excede el límite de ${maxFiles}.`);
+        }
+
+        if (filesToProcess.length === 0 && newFiles.length > 0) {
+            alert("No se seleccionaron archivos de imagen válidos.");
+            event.target.value = null; 
+            return;
+        }
+
+        let loadedCount = 0;
+
+        filesToProcess.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                // Añadir la nueva foto al array global
+                uploadedFiles.push({
+                    id: ++photoIdCounter, // Usar el contador para asegurar ID único
+                    file: file,
+                    dataURL: e.target.result,
+                    description: '', 
+                });
+                loadedCount++;
+
+                if (loadedCount === filesToProcess.length) {
+                    renderPhotoPreview(); 
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        event.target.value = null; // Limpiar el input para permitir subir el mismo archivo
+    }
+
+    // ====================================================================
+    // 3. ENVÍO
+    // ====================================================================
+
+   async function capturarDatos() {
+    const form = document.getElementById('hvacForm');
+    // Asumimos que esta variable existe en el HTML
+    const ordenId = form.querySelector('input[name="orden_id"]').value; 
+    
+    // --- 1. VALIDACIÓN (MISMO CÓDIGO) ---
+    
+    // 1a. Validación HTML Nativa
+    if (!form.checkValidity()) {
+        form.reportValidity(); 
+        return; 
+    }
+    
+    // 1b. Validación de Firmas y Evidencia
+    saveSignature('signatureCliente'); 
+    saveSignature('signatureTecnico');
+
+    if (!firmaClienteDataURL || !firmaTecnicoDataURL) {
+        alert("⚠️ Es obligatorio recabar ambas firmas. Por favor, firme en los recuadros y presione 'Confirmar'.");
+        switchTab('reporte'); 
+        return; 
+    }
+    
+    if (uploadedFiles.length === 0) {
+        alert("⚠️ Es obligatorio subir al menos una foto de evidencia.");
+        switchTab('reporte'); 
+        return;
+    }
+    
+    // --- 2. VERIFICACIÓN DE CONEXIÓN Y GUARDADO OFFLINE ---
+    
+    if (!isOnline()) {
+        // 🛑 FLUJO OFFLINE: Si no hay conexión, guardamos en local y terminamos.
+        saveDraft(ordenId); 
+        return; 
+    }
+
+    // --- 3. ENVÍO ONLINE (CÓDIGO ORIGINAL CON TRY/CATCH MEJORADO) ---
+
+    console.log("🚀 Iniciando captura y envío ONLINE...");
+    
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const formData = new FormData();
+
+    // 4. Recopilar datos estándar
+    const formElements = document.querySelectorAll('#hvacForm input, #hvacForm select, #hvacForm textarea');
+    formElements.forEach(element => {
+        // Excluir archivos y elementos de descripción temporal
+        if (element.type !== 'file' && element.name && !element.name.startsWith('desc_foto_')) { 
+            formData.append(element.name, element.value);
+        }
+    });
+
+    // 5. Añadir firmas, fotos y descripciones finales
+    formData.append('materiales_json', JSON.stringify([])); 
+    if (firmaClienteDataURL) formData.append('firma_cliente_dataurl', firmaClienteDataURL);
+    if (firmaTecnicoDataURL) formData.append('firma_tecnico_dataurl', firmaTecnicoDataURL);
+
+    // Iterar sobre el array global 'uploadedFiles' para adjuntar archivos y descripciones
+    if (uploadedFiles.length > 0) {
+        uploadedFiles.forEach(fileObj => {
+            formData.append('fotos', fileObj.file, fileObj.file.name);
+            formData.append('descripciones', fileObj.description); 
+        });
+    }
+
+    try {
+        const response = await fetch('{% url "guardar_registro_tecnico" %}', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken },
+            body: formData,
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert(`✅ ${result.message}`);
+            // 🛑 Limpiar borrador local tras éxito en el servidor
+            localStorage.removeItem(ORDEN_KEY_PREFIX + ordenId);
+            window.location.href = '{% url "lista_reportes_pendientes" %}'; // Redirigir al dashboard de reportes
+        } else {
+            // Error de validación o lógica del servidor (No es error de red)
+            alert(`❌ Error al guardar en el servidor: ${result.message}`);
+            console.error('Error del servidor:', result);
+        }
+    } catch (error) {
+        // 🛑 Error de red (Network Error) durante el envío
+        console.error('Error de red durante el envío:', error);
+        alert('❌ Error de conexión al servidor. Guardando borrador localmente.');
+        saveDraft(ordenId); // Guardamos la información por si el error fue de red
+    }
+}
+
+// ====================================================================
+    // 4. INICIALIZACIÓN
+    // ====================================================================
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+    // 🚀 REGISTRAR SERVICE WORKER (INICIO)
+    if ('serviceWorker' in navigator) {
+        // Ejecutamos el registro directamente aquí, sin esperar otro 'load'
+        navigator.serviceWorker.register('{% static "service-worker.js" %}', { scope: '/' })
+            .then(function(registration) {
+                console.log('Service Worker registrado con éxito: ', registration.scope);
+            })
+            .catch(function(err) {
+                console.log('Fallo en el registro del Service Worker: ', err);
+            });
+    }
+
+    // ----------------------------------------------------
+    // INICIALIZACIÓN DE LA PÁGINA (Tu lógica original)
+    // ----------------------------------------------------
+    switchTab('datos-tecnicos');
+    const photoInput = document.getElementById('photoUpload');
+    if(photoInput) photoInput.addEventListener('change', handleImageUpload);
+    
+    // 🛑 LLAMADA A CARGAR Y SINCRONIZAR AL INICIO
+    const ordenId = document.querySelector('#hvacForm input[name="orden_id"]').value;
+    if (ordenId) {
+        syncAndLoadDraft(ordenId);
+    }
+    
+    // 🛑 Listener de conexión para sincronizar automáticamente al recuperar internet
+    window.addEventListener('online', () => {
+        const ordenIdOnPage = document.querySelector('#hvacForm input[name="orden_id"]').value;
+        if (ordenIdOnPage) {
+            syncAndLoadDraft(ordenIdOnPage);
+        }
+    });
+
+}); // Cierra el DOMContentLoaded
+
+    </script>
+</body>
+</html>

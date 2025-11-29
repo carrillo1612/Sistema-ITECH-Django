@@ -1,0 +1,369 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Orden {{ orden.OrdenID }}</title>
+    <style>
+        /* --- CONFIGURACIÓN DE PÁGINA --- */
+        @page {
+            size: letter;
+            /* Margen superior: 1.5cm */
+            margin: 1.5cm 1.5cm 2cm 1.5cm; 
+
+            /* El encabezado ya NO está en el marco, se imprime estáticamente */
+            
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                bottom: 0cm;
+                left: 1.5cm;
+                width: 18.5cm;
+                height: 1.5cm;
+            }
+        }
+
+        /* --- ESTILOS GENERALES --- */
+        body {
+            font-family: Helvetica, sans-serif;
+            font-size: 9pt;
+            color: #333;
+            line-height: 1.3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        td, th {
+            padding: 4px 6px;
+            vertical-align: top;
+        }
+
+        .section-title {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            padding: 4px 8px;
+            margin-top: 10px;
+            font-size: 10pt;
+            border-radius: 2px;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+        }
+
+        .label {
+            font-weight: bold; color: #444;
+            background-color: #f8f8f8;
+            width: 20%;
+            border: 1px solid #ddd;
+        }
+        .value {
+            border: 1px solid #ddd; color: #000;
+        }
+
+        .table-header {
+            background-color: #eee;
+            font-weight: bold;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .folio-box {
+            border: 2px solid #a94442; color: #a94442;
+            font-weight: bold; font-size: 12pt;
+            padding: 4px 10px; text-align: center; border-radius: 4px;
+            display: inline-block;
+            background-color: #fff;
+        }
+
+        .logo { max-height: 60px; }
+        .signature-img { max-height: 60px; max-width: 150px; }
+
+        /* CLAVE: ESTILO PARA EVITAR CORTES DE SECCIÓN */
+        .section-block {
+            page-break-inside: avoid;
+            margin-top: 10px;
+        }
+
+        /* --- ESTILOS PARA EVIDENCIA FOTOGRÁFICA (2 Columnas Grandes) --- */
+        .evidence-cell {
+            width: 50%;
+            padding: 10px 5px;
+            vertical-align: top;
+            text-align: center;
+            border: none;
+        }
+
+        .image-box {
+            border: 1px solid #ddd;
+            padding: 6px; 
+            background: #fff;
+            box-sizing: border-box;
+            page-break-inside: avoid;
+            width: 100%; 
+        }
+
+        .evidence-img {
+            width: 100%;
+            height: auto; 
+            max-width: 100%;
+            display: block;
+        }
+
+        .evidence-caption {
+            font-size: 9pt; 
+            color: #333;
+            margin-top: 6px;
+            text-align: left;
+            padding: 4px 5px; 
+            font-weight: normal;
+            line-height: 1.2;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="header_content">
+        <table style="margin-bottom: 5px;">
+            <tr>
+                <td width="25%" valign="middle" align="left">
+                    <img src="{% static 'img/logo.jpeg' %}" alt="Logo iTECH" class="logo">
+                </td>
+                
+                <td width="50%" align="center" valign="middle">
+                    <div style="font-size: 14pt; font-weight: bold; color: #000;">GRUPO IENER TECNOLOGIAS APLICADAS</div>
+                    <div style="font-size: 11pt; color: #007bff; margin-top: 5px;">Orden de Servicio Técnico</div>
+                </td>
+                
+                <td width="25%" align="right" valign="middle">
+                    <div class="folio-box">
+                        Folio {{ orden.OrdenID }}
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <div style="border-bottom: 3px solid #5bc0de;"></div>
+    </div>
+
+    <div id="footer_content">
+        <table style="width: 100%;">
+            <tr>
+                <td align="left" style="width: 80%; color: #000; font-weight: bold; font-size: 8pt; border: none;">
+                    CALLE CLAVELES #149, COL. LAS ROSAS, COMALCALCO, TABASCO.<br>
+                    Tel. | ventas@i-techmx.com
+                </td>
+                <td align="right" style="width: 20%; color: #000; font-weight: bold; font-size: 9pt; border: none; padding-right: 10px;">
+                    Página: <pdf:pagenumber /> / <pdf:pagecount />
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="section-block">
+        <div class="section-title">INFORMACIÓN GENERAL</div>
+        <table class="data-table">
+            <tr>
+                <td class="label">Cliente:</td>
+                <td class="value"><b>{{ orden.ClienteEmpresa.NombreComercial }}</b></td>
+                <td class="label">Fecha:</td>
+                <td class="value">{{ orden.Programada|date:"d/m/Y H:i" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Dirección:</td>
+                <td class="value" colspan="3">{{ orden.Ubicacion }}</td>
+            </tr>
+            <tr>
+                <td class="label">Contacto:</td>
+                <td class="value">{{ orden.ClienteEmpresa.NombreContacto|default:orden.TelefonoContacto }}</td>
+                <td class="label">Técnico:</td>
+                <td class="value">{{ orden.PersonalAsignado.Nombre }} {{ orden.PersonalAsignado.Apellido }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section-block">
+        <div class="section-title">DETALLES DEL SERVICIO</div>
+        <table class="data-table">
+            <tr>
+                <td class="label">Servicio:</td>
+                <td class="value" colspan="3"><b>{{ orden.Servicio }}</b></td>
+            </tr>
+            <tr>
+                <td class="label">Falla:</td>
+                <td class="value" colspan="3">{{ orden.FallaReportada|default:"--" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Realizado:</td>
+                <td class="value" colspan="3">{{ reporte.ServicioRealizado|default:"--" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section-block">
+        <div class="section-title">1. DATOS DEL EQUIPO</div>
+        <table class="data-table">
+            <tr>
+                <td class="label">Tipo Unidad:</td>
+                <td class="value">{{ reporte.TipoUnidad|default:"--" }}</td>
+                <td class="label">Marca:</td>
+                <td class="value">{{ reporte.Marca|default:"--" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Modelo:</td>
+                <td class="value">{{ reporte.Modelo|default:"--" }}</td>
+                <td class="label">Capacidad:</td>
+                <td class="value">{{ reporte.Capacidad|default:"--" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Gas Refrig.:</td>
+                <td class="value">{{ reporte.TipoGasRefrigerante|default:"--" }}</td>
+                <td class="label">Condensador:</td>
+                <td class="value">{{ reporte.InstalacionCondensador|default:"--" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section-block">
+        <div class="section-title">2. LECTURAS TÉCNICAS</div>
+        <table class="data-table">
+            <tr>
+                <td class="label">Presión:</td>
+                <td class="value">{{ reporte.PresionGasRefrig|default:"--" }} PSI</td>
+                <td class="label">Voltaje:</td>
+                <td class="value">{{ reporte.VoltajeAlimentacion|default:"--" }} V</td>
+                <td class="label">Amperaje:</td>
+                <td class="value">{{ reporte.AmpTerminalesCompresor_Actual|default:"--" }} A</td>
+            </tr>
+            <tr>
+                <td class="label">T. Descarga:</td>
+                <td class="value">{{ reporte.TempDescarga|default:"--" }} °C</td>
+                <td class="label">T. Habitac.:</td>
+                <td class="value">{{ reporte.TempHabitacion|default:"--" }} °C</td>
+                <td class="label">Vacío:</td>
+                <td class="value">{{ reporte.BombaVacio|default:"--" }} CFM</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section-block">
+        <div class="section-title">3. REGISTRO DE COMPONENTES</div>
+        <table class="data-table">
+            <tr>
+                <td class="table-header">Componente</td>
+                <td class="table-header">Original</td>
+                <td class="table-header">Actual</td>
+            </tr>
+            <tr>
+                <td class="label">Capacitor Compresor</td>
+                <td class="value center">{{ reporte.CapacitorCompresor_Original|default:"--" }}</td>
+                <td class="value center">{{ reporte.CapacitorCompresor_Actual|default:"--" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Capacitor Ventilador</td>
+                <td class="value center">{{ reporte.CapacitorVentilador_Original|default:"--" }}</td>
+                <td class="value center">{{ reporte.CapacitorVentilador_Actual|default:"--" }}</td>
+            </tr>
+            <tr>
+                <td class="label">Amp. Compresor</td>
+                <td class="value center">{{ reporte.AmpTerminalesCompresor_Original|default:"--" }}</td>
+                <td class="value center">{{ reporte.AmpTerminalesCompresor_Actual|default:"--" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section-block">
+        <div class="section-title">4. MATERIALES UTILIZADOS</div>
+        <table class="data-table">
+            <tr>
+                <td class="table-header" width="10%">Cant.</td>
+                <td class="table-header" width="30%">Producto</td>
+                <td class="table-header" width="60%">Descripción</td>
+            </tr>
+            {% for item in items %}
+            <tr>
+                <td class="value center">{{ item.Cantidad }}</td>
+                <td class="value">{{ item.Producto }}</td>
+                <td class="value">{{ item.InformacionAdicional }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="value center">No se registraron materiales adicionales.</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    
+    <div class="section-block">
+        <div class="section-title">OBSERVACIONES</div>
+        <div class="obs-box">
+            {{ reporte.ObservacionesTexto|linebreaksbr|default:"Sin observaciones." }}
+        </div>
+
+        <br>
+        <table style="margin-top: 10px;">
+            <tr>
+                <td width="20%" align="center" valign="bottom">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=Orden-{{ orden.OrdenID }}" width="80" height="80"/>
+                </td>
+                
+                <td width="40%" align="center" valign="bottom">
+                    {% if reporte.FirmaTecnico %}
+                        <img src="{{ reporte.FirmaTecnico.url }}" class="signature-img" />
+                    {% else %}
+                        <div style="height: 60px;"></div>
+                    {% endif %}
+                    <div style="border-top: 1px solid #000; margin: 0 15px; padding-top: 5px;">Firma Técnico</div>
+                </td>
+
+                <td width="40%" align="center" valign="bottom">
+                    {% if reporte.FirmaCliente %}
+                        <img src="{{ reporte.FirmaCliente.url }}" class="signature-img" />
+                    {% else %}
+                        <div style="height: 60px;"></div>
+                    {% endif %}
+                    <div style="border-top: 1px solid #000; margin: 0 15px; padding-top: 5px;">Firma Cliente</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <pdf:nextpage />
+    <div class="section-title">EVIDENCIA FOTOGRÁFICA (Máx. 12 Imágenes)</div>
+    
+    <table style="margin-top: 15px; width: 100%;">
+        <tr>
+        {% for foto in fotos|slice:":12" %} <td class="evidence-cell" valign="top">
+                
+                <div class="image-box">
+                    
+                    {% if foto.Imagen %}
+                        <img src="{{ foto.Imagen.url }}" class="evidence-img" />
+                    {% else %}
+                        <div style="width: 100%; height: 80px; background-color: #eee; color: #aaa; text-align: center; line-height: 80px; font-size: 8pt;">Sin Imagen</div>
+                    {% endif %}
+
+                    <div class="evidence-caption">
+                        <b>{{ forloop.counter }}.</b> {{ foto.Descripcion|default:"Evidencia del servicio" }}
+                    </div>
+                </div>
+
+            </td>
+            
+            {% if forloop.counter|divisibleby:2 and not forloop.last %}
+                </tr><tr>
+            {% endif %}
+            
+        {% empty %}
+            <td class="evidence-cell" style="padding: 30px; text-align: center; color: #777; border: 1px dashed #ccc;">
+                No se adjuntó evidencia fotográfica a este reporte.
+            </td>
+        {% endfor %}
+        </tr>
+    </table>
+
+</body>
+</html>

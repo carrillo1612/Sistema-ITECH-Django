@@ -1,0 +1,21 @@
+{
+    "name": "ITECH TÉCNICO OFFLINE",
+    "short_name": "ITECH Offline",
+    "description": "Registro Técnico de Servicio sin conexión.",
+    "start_url": "/login/", 
+    "display": "standalone",
+    "background_color": "#0F172A",
+    "theme_color": "#2563EB",
+    "icons": [
+        {
+            "src": "/static/img/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/img/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

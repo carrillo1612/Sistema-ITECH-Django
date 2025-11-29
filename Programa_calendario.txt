@@ -1,0 +1,124 @@
+             VISTAS
+Calendario --- Asignación de las tareas
+
+Filtrado de actividades de los clientes (Expediente)
+Filtrado de personal (Expediente)
+Estado de orden servicio:
+	Pendiente, Terminado, Cancelado
+Exportar en excel (Opcional)
+
+*Divisiones*
+Actividad agregado
+	Titulo (Nombre de la actividad)
+	Cliente
+	Descripción de la tarea
+	Fecha 
+	Inicio (Hora) Fin(Hora)
+	Asignado a (Este dato no los darán ellos)
+	Estado
+	Ubicación (opcional)
+
+	
+	
+Clientes ---- Registro y expediente de los clientes
+Filtros de clientes
+Nuevos clientes
+Agregado de clientes
+Exportar a pdf (Clientes)
+Exls (Excel)
+Filtro por codigo
+**Divisiones**
+Nuevo cliente
+  **Datos generales** (Preguntar por los faltantes)
+	Cliente sucursal (Si es cliente o sucursal)
+	Nombre comercial
+	Teléfono o celular
+	Calle
+	Colonia
+	Ciudad
+	Giro
+	Correo 
+	Numero exterior - interior 
+	País
+	**Mas información**
+		Pagina / Portal web (Preguntar)
+		Numero de facturación (Rfc)
+		Calle de envió
+		Colonia de envió
+		País de envió 
+		Nombre de facturación 
+		Domicilio de facturación 
+		Numero de envió 
+		Código postal de envió 
+		Estado de envió
+	
+	
+
+
+Ordenes de servicio --(cargando todos los servicios que tienen)
+Fecha desde(Programada)
+Hasta(Programada) 
+Filtrado
+	Cliente
+	Activos(Preguntar)
+	Servicios(Todos "Preguntar")
+	Estado
+	Personal
+	Buscar por folio
+*Divisiones*
+	Nueva orden:
+		*Datos del equipo*
+		Marca
+		Modelo
+		Tipo de gas
+		Capacidad 
+		Distancia evap-cond
+		Distancia - calibre alimentación 
+		Tamaño de la habitación
+		Tipo(Clima, etc)
+		Desagüe
+		Jardin(Preguntar)
+		Servicio(Mantenimiento, instalación "Opción multiple")
+		Condensador: mensula(Opción multiple)
+		
+		*Datos técnicos*
+		Presión Gas Refrigerante encontrada: 45 PSI
+		Voltaje de Alimentación: 115 V
+		Voltaje Terminales de Cond. 112 V
+		Temp de habitación: °C
+		Temp. de Descarga: °C
+		Bomba de Vacío: 3 CFM. Tiempo: 30 Min
+		Componente Original Actual
+			
+		*Observaciones*
+		Texfield
+		
+		*Subir imágenes*
+		*Firmar*
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

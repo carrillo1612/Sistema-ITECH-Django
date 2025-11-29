@@ -1,0 +1,400 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes | ITECH</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0F172A', // Azul oscuro elegante
+                        accent: '#2563EB',  // Azul brillante para acciones
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Lógica de visibilidad del Modal (Mantenida para tu JS) */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.is-visible { display: flex; }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden font-sans">
+
+    <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-20 shrink-0">
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <img src="{% static 'img/logo.JPEG' %}" alt="Logo" class="h-8 w-auto object-contain">
+                <span class="font-bold text-xl tracking-tight text-slate-900">ITECH</span>
+            </div>
+            <div class="hidden md:flex h-6 w-px bg-slate-300 mx-2"></div>
+            <span class="hidden md:block text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">
+                <i class="fas fa-headset mr-1"></i> Soporte: +52 999 456 7891
+            </span>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="text-right hidden sm:block">
+                <p class="text-sm font-semibold text-slate-700">{{ user.Nombre }} {{ user.Apellido }}</p>
+                <p class="text-xs text-slate-500">{{ user.Rol }}</p>
+            </div>
+            <div class="h-10 w-10 bg-accent/10 rounded-full flex items-center justify-center text-accent font-bold border border-accent/20">
+                {{ user.Nombre|slice:":1" }}{{ user.Apellido|slice:":1" }}
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <aside class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10">
+            <div class="p-6">
+                <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4">Menú Principal</p>
+                   <nav class="space-y-1">
+    
+    <a href="{% url 'vista_calendario' %}" 
+        class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
+        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
+    </a>
+
+      <a href="{% url 'lista_ordenes' %}" 
+        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
+    </a>
+    
+    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
+    <a href="{% url 'lista_reportes_pendientes' %}" 
+        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
+    </a>
+    {% endif %}
+
+    {% if request.user.Rol == 'Administrador' %}
+    
+    <a href="{% url 'lista_clientes' %}" 
+        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
+    </a>
+
+
+    <a href="{% url 'gestion_usuarios' %}" 
+        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
+    </a>
+    {% endif %}
+
+</nav>
+            </div>
+            <div class="mt-auto p-6 border-t border-slate-800">
+                <p class="text-xs text-center text-slate-600">&copy; 2024 ITECH System</p>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50">
+            
+            <div class="px-8 py-6 pb-2 shrink-0">
+                <div class="flex items-center gap-3 mb-1">
+                    <div class="p-2 bg-blue-100 text-accent rounded-lg">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-slate-800">Gestión de Clientes</h1>
+                </div>
+                <p class="text-slate-500 text-sm ml-12">Administra la base de datos de tus clientes y sucursales.</p>
+            </div>
+
+            <div class="flex-1 p-6 sm:px-8 pt-4 overflow-y-auto custom-scrollbar">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden h-full">
+                    
+                    <div class="p-4 border-b border-slate-200 bg-white flex flex-wrap justify-between items-center gap-4">
+                        
+                        <div class="flex items-center gap-3 text-sm text-slate-600">
+                            </div>
+
+                        <div class="flex items-center gap-3">
+                            <button id="btn_nuevo_cliente" class="bg-accent hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm shadow-blue-500/30 flex items-center gap-2">
+                                <i class="fas fa-plus"></i> Nuevo Cliente
+                            </button>
+                            
+                            <div class="flex gap-1">
+                                <button id="btn_xls" class="bg-emerald-500 hover:bg-emerald-600 text-white w-9 h-9 rounded-lg flex items-center justify-center transition-colors" title="Exportar Excel">
+                                    <i class="fas fa-file-excel"></i>
+                                </button>
+                                <button id="btn_importar" class="bg-slate-600 hover:bg-slate-700 text-white w-9 h-9 rounded-lg flex items-center justify-center transition-colors" title="Importar">
+                                    <i class="fas fa-file-import"></i>
+                                </button>
+                            </div>
+
+                            <form method="GET" action="{% url 'lista_clientes' %}" class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                
+                                <input type="text" 
+                                        name="q" 
+                                        id="search-input" 
+                                        placeholder="Buscar cliente..." 
+                                        value="{{ request.GET.q|default:'' }}" 
+                                        class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none w-48 transition-all focus:w-64">
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-auto">
+                        <table class="w-full text-sm text-left text-slate-600">
+                            <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-6 py-3 border-b border-slate-200 w-16"></th>
+                                    <th class="px-6 py-3 border-b border-slate-200 w-24">Código</th>
+                                    <th class="px-6 py-3 border-b border-slate-200">Empresa</th>
+                                    <th class="px-6 py-3 border-b border-slate-200">Ciudad</th>
+                                    <th class="px-6 py-3 border-b border-slate-200">Contacto</th>
+                                    <th class="px-6 py-3 border-b border-slate-200">Correo</th>
+                                    <th class="px-6 py-3 border-b border-slate-200">Teléfono</th>
+                                    <th class="px-6 py-3 border-b border-slate-200 w-16"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                {% for cliente in lista_de_clientes %}
+                                <tr class="hover:bg-slate-50 transition-colors group">
+                                    <td class="px-6 py-3 text-center">
+                                        <form action="{% url 'eliminar_cliente' cliente.ClienteID %}" method="POST" class="inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="text-slate-300 hover:text-red-500 transition-colors" 
+                                                    onclick="return confirm('¿Estás seguro de que deseas eliminar a {{ cliente.NombreComercial }}?');"
+                                                    title="Eliminar">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="px-6 py-3 font-mono text-xs font-bold text-slate-500 bg-slate-50/50">
+                                        {{ cliente.ClienteID }}
+                                    </td>
+                                    <td class="px-6 py-3 font-medium text-slate-800">
+                                        {{ cliente.NombreComercial }}
+                                    </td>
+                                    <td class="px-6 py-3">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600">
+                                            {{ cliente.Ciudad }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-3">{{ cliente.NombreComercial }}</td> 
+                                    <td class="px-6 py-3 text-slate-500">{{ cliente.Correo }}</td>
+                                    <td class="px-6 py-3 text-slate-500">{{ cliente.Telefono }}</td>
+                                    <td class="px-6 py-3 text-center">
+                                        <a href="{% url 'editar_cliente' cliente.ClienteID %}" class="text-accent hover:text-blue-700 bg-blue-50 w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-100 transition-all" title="Editar">
+                                            <i class="fas fa-pen text-xs"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="px-6 py-12 text-center text-slate-500">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3 text-slate-300">
+                                                <i class="fas fa-user-slash text-3xl"></i>
+                                            </div>
+                                            <p>No hay clientes registrados.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal_nuevo_cliente" class="modal">
+        <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden transform transition-all">
+            
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-accent">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">
+                            {% if cliente_a_editar %}Editar Cliente{% else %}Registrar Cliente{% endif %}
+                        </h3>
+                        <p class="text-xs text-slate-500">Complete la información requerida (*)</p>
+                    </div>
+                </div>
+                <button class="text-slate-400 hover:text-slate-600 text-2xl leading-none" data-dismiss="modal">&times;</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto custom-scrollbar">
+                
+                {% if cliente_a_editar %}
+                    <form id="form_cliente" method="POST" action="{% url 'editar_cliente' cliente_a_editar.ClienteID %}">
+                {% else %}
+                    <form id="form_cliente" method="POST" action="{% url 'lista_clientes' %}">
+                {% endif %}
+                    {% csrf_token %}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        
+                        <div class="md:col-span-2">
+                            <label for="nombre_comercial" class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre Comercial *</label>
+                            <input type="text" id="nombre_comercial" name="NombreComercial" required value="{{ cliente_a_editar.NombreComercial|default:'' }}" 
+                                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
+                        </div>
+
+                        <div>
+                            <label for="telefono" class="block text-xs font-bold text-slate-600 uppercase mb-1">Teléfono</label>
+                            <input type="text" id="telefono" name="Telefono" required value="{{ cliente_a_editar.Telefono|default:'' }}"
+                                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
+                        </div>
+
+                        <div>
+                            <label for="correo" class="block text-xs font-bold text-slate-600 uppercase mb-1">Correo Electrónico</label>
+                            <input type="email" id="correo" name="Correo" required value="{{ cliente_a_editar.Correo|default:'' }}"
+                                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
+                        </div>
+
+                        <div class="md:col-span-2 grid grid-cols-4 gap-4">
+                            <div class="col-span-2">
+                                <label for="calle" class="block text-xs font-bold text-slate-600 uppercase mb-1">Calle *</label>
+                                <input type="text" id="calle" name="Calle" required value="{{ cliente_a_editar.Calle|default:'' }}"
+                                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
+                            </div>
+                            <div>
+                                <label for="numero_exterior" class="block text-xs font-bold text-slate-600 uppercase mb-1">Num. Ext</label>
+                                <input type="text" id="numero_exterior" name="NumeroExterior" required value="{{ cliente_a_editar.NumeroExterior|default:'' }}"
+                                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
+                            </div>
+                            <div>
+                                <label for="interior" class="block text-xs font-bold text-slate-600 uppercase mb-1">Int</label>
+                                <input type="text" id="interior" name="Interior" required value="{{ cliente_a_editar.Interior|default:'' }}"
+                                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="colonia" class="block text-xs font-bold text-slate-600 uppercase mb-1">Colonia</label>
+                            <input type="text" id="colonia" name="Colonia" required value="{{ cliente_a_editar.Colonia|default:'' }}"
+                                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
+                        </div>
+                        <div>
+                            <label for="cp" class="block text-xs font-bold text-slate-600 uppercase mb-1">Código Postal</label>
+                            <input type="text" id="cp" name="CodigoPostal" required value="{{ cliente_a_editar.CodigoPostal|default:'' }}"
+                                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
+                        </div>
+
+                        <div>
+                            <label for="ciudad" class="block text-xs font-bold text-slate-600 uppercase mb-1">Ciudad *</label>
+                            <input type="text" id="ciudad" name="Ciudad" required value="{{ cliente_a_editar.Ciudad|default:'Tabasco' }}"
+                                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
+                        </div>
+                        <div>
+                            <label for="pais" class="block text-xs font-bold text-slate-600 uppercase mb-1">País *</label>
+                            <select id="pais" name="Pais" required
+                                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
+                                <option value="México" {% if cliente_a_editar.Pais == 'México' %}selected{% endif %}>México</option>
+                                <option value="Otro" {% if cliente_a_editar.Pais == 'Otro' %}selected{% endif %}>Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="ubicacion" class="block text-xs font-bold text-slate-600 uppercase mb-1">Ubicación (Google Maps)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="ubicacion" name="Ubicacion" required value="{{ cliente_a_editar.Ubicacion|default:'' }}" placeholder="Pega aquí el link..."
+                                        class="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
+                                <a href="https://www.google.com.mx/maps" target="_blank" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors">
+                                    <i class="fas fa-map-marked-alt text-accent"></i> Ir a Maps
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+                <button type="button" data-dismiss="modal" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-white hover:text-slate-800 transition font-medium text-sm">Cancelar</button>
+                <button type="submit" form="form_cliente" class="px-6 py-2 rounded-lg bg-accent text-white hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition font-medium text-sm">Guardar Cliente</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM Cargado - Clientes (Modo Simple)");
+
+            // --- Lógica para abrir/cerrar Modal ---
+            const modal = document.getElementById("modal_nuevo_cliente");
+            const btnNuevo = document.getElementById("btn_nuevo_cliente");
+            const closeButtons = document.querySelectorAll('[data-dismiss="modal"]');
+            const form = document.getElementById("form_cliente"); // Obtenemos el formulario
+
+            function closeModal() {
+                if (modal) {
+                    modal.classList.remove('is-visible');
+                }
+                // Limpia la URL si es necesario
+                window.history.pushState({}, '', '/clientes/'); // Asegúrate de que esta URL base sea correcta
+            }
+
+            if (btnNuevo && modal) {
+                btnNuevo.onclick = function() {
+                    if (form) {
+                        form.reset(); 
+                    }
+                    modal.classList.add('is-visible');
+                }
+            }
+
+            closeButtons.forEach(button => {
+                button.onclick = closeModal;
+            });
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    closeModal();
+                }
+            }
+            
+            // --- Si estamos en modo edición (viene del backend) ---
+            {% if cliente_a_editar %}
+            if (modal) {
+                modal.classList.add('is-visible');
+            }
+            {% endif %}
+        });
+    </script>
+</body>
+</html>

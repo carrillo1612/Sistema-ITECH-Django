@@ -1,0 +1,185 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Acceso al Sistema | ITECH</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Variables Globales (Tomadas de tus archivos) */
+        :root {
+            --primary-color: #007bff; /* Azul primario */
+            --secondary-color: #6c757d;
+            --dark-bg: #343a40; /* Fondo oscuro del sidebar */
+            --light-bg: #f8f9fa; /* Fondo claro general */
+            --text-color: #333;
+            --light-text-color: #fff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--light-bg) 0%, #e9ecef 100%);
+            color: var(--text-color);
+        }
+
+        /* Contenedor del Formulario */
+        .login-container {
+            width: 100%;
+            max-width: 380px;
+            padding: 30px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Encabezado del Login */
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Estilos del Logo */
+        .logo-login {
+            width: 80px; /* Tamaño fijo para que se vea centrado */
+            height: auto;
+            margin: 0 auto 15px;
+            display: block; /* Importante para centrar la imagen */
+        }
+        
+        .login-header h1 {
+            font-size: 1.8em;
+            color: var(--dark-bg);
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .login-header p {
+            font-size: 0.9em;
+            color: var(--secondary-color);
+            margin-top: 5px;
+        }
+
+        /* Estilos de los Campos del Formulario */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .input-icon-group {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: var(--light-bg);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .input-icon-group:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        .input-icon-group i {
+            color: var(--secondary-color);
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+
+        .input-icon-group input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 0;
+            font-size: 1em;
+            background-color: transparent;
+            color: var(--text-color);
+        }
+
+        /* Botón de Acceso */
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .btn-login:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-login:active {
+            transform: translateY(1px);
+        }
+
+        /* Enlaces de Ayuda */
+        .help-links {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .help-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            margin: 0 8px;
+            transition: color 0.3s;
+        }
+
+        .help-links a:hover {
+            text-decoration: underline;
+            color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <img src="{% static 'img/logo.JPEG' %}" alt="Logo ITECH" class="logo-login">
+            
+            <h1>Acceso ITECH</h1>
+            <p>Ingresa tus credenciales para continuar</p>
+        </div>
+
+       <form method="POST"> 
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="username" style="display:none;">Usuario</label>
+                <div class="input-icon-group">
+                    <i class="fas fa-user-circle"></i>
+                    <input type="text" id="username" name="username" placeholder="Nombre de usuario o Correo" required autofocus>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" style="display:none;">Contraseña</label>
+                <div class="input-icon-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" name="password" placeholder="Contraseña" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i> Ingresar
+            </button>
+            
+        </form> 
+
+
+ 
+    </div>
+</body>
+</html>

@@ -1,0 +1,196 @@
+{% load static %}
+{% load i18n %}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ITECH System{% endblock %}</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0F172A', // Azul oscuro elegante
+                        accent: '#2563EB',  // Azul brillante para acciones
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Estilos generales */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        /* Clases para manejar la visibilidad del sidebar en móvil */
+        .sidebar-active {
+            transform: translateX(0) !important;
+        }
+    </style>
+    {% block extra_head %}
+    {% endblock extra_head %}
+</head>
+
+<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden font-sans">
+
+    <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-20 shrink-0">
+        <div class="flex items-center gap-4">
+            <button id="menu-toggle" class="md:hidden text-slate-600 hover:text-accent p-2 rounded">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            
+            <div class="flex items-center gap-2">
+                <img src="{% static 'img/logo.JPEG' %}" alt="Logo" class="h-8 w-auto object-contain">
+                <span class="font-bold text-xl tracking-tight text-slate-900">ITECH</span>
+            </div>
+            <div class="hidden md:flex h-6 w-px bg-slate-300 mx-2"></div>
+            <span class="hidden md:block text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">
+                <i class="fas fa-headset mr-1"></i> Soporte: +52 999 456 7891
+            </span>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="text-right hidden sm:block">
+                <p class="text-sm font-semibold text-slate-700">{{ user.Nombre }} {{ user.Apellido }}</p>
+                <p class="text-xs text-slate-500">{{ user.Rol }}</p> 
+            </div>
+            <div class="h-10 w-10 bg-accent/10 rounded-full flex items-center justify-center text-accent font-bold border border-accent/20">
+                {{ user.Nombre|slice:":1" }}{{ user.Apellido|slice:":1" }}
+            </div>
+            <a href="{% url 'logout' %}" class="ml-2 text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-colors" title="Cerrar Sesión">
+                <i class="fas fa-sign-out-alt text-lg"></i>
+            </a>
+        </div>
+    </nav>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <aside id="sidebar" 
+               class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex-col shadow-xl z-30 fixed top-0 left-0 h-full transform -translate-x-full 
+                      md:flex md:static md:translate-x-0 transition-transform duration-300"> 
+            
+            <div class="p-6">
+                <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4">Menú Principal</p>
+                <nav class="space-y-1">
+                    
+                    {% url 'vista_calendario' as calendario_url %}
+                    {% url 'lista_ordenes' as ordenes_url %}
+                    {% url 'lista_reportes_pendientes' as reportes_url %}
+                    {% url 'lista_clientes' as clientes_url %}
+                    {% url 'gestion_usuarios' as usuarios_url %}
+                    {% with request.path as current_path %}
+                    {% with 'bg-slate-800 text-white border-r-4 border-accent' as active_class %}
+                    {% with 'hover:bg-slate-800 hover:text-white' as inactive_class %}
+                    
+                    <a href="{{ calendario_url }}" 
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg 
+                              {% if current_path == calendario_url %}{{ active_class }}{% else %}{{ inactive_class }}{% endif %}
+                              transition-all group">
+                        <i class="fas fa-calendar-alt w-5 text-center {% if current_path == calendario_url %}text-accent{% endif %} transition-colors"></i> Calendario
+                    </a>
+
+                    {% if request.user.Rol == 'Administrador' %}
+                    <a href="{{ ordenes_url }}" 
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg 
+                              {% if current_path == ordenes_url %}{{ active_class }}{% else %}{{ inactive_class }}{% endif %}
+                              transition-all group">
+                        <i class="fas fa-file-invoice w-5 text-center {% if current_path == ordenes_url %}text-accent{% endif %} group-hover:text-accent transition-colors"></i> Órdenes
+                    </a>
+                    {% endif %}
+                    
+                    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
+                    <a href="{{ reportes_url }}" 
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg 
+                              {% if current_path == reportes_url %}{{ active_class }}{% else %}{{ inactive_class }}{% endif %}
+                              transition-all group">
+                        <i class="fas fa-tools w-5 text-center {% if current.path == reportes_url %}text-accent{% endif %} group-hover:text-accent transition-colors"></i> Generar Reporte
+                    </a>
+                    {% endif %}
+
+                    {% if request.user.Rol == 'Administrador' %}
+                    <a href="{{ clientes_url }}" 
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg 
+                              {% if current_path == clientes_url %}{{ active_class }}{% else %}{{ inactive_class }}{% endif %}
+                              transition-all group">
+                        <i class="fas fa-users w-5 text-center {% if current_path == clientes_url %}text-accent{% endif %} group-hover:text-accent transition-colors"></i> Clientes
+                    </a>
+                    <a href="{{ usuarios_url }}" 
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg 
+                              {% if current_path == usuarios_url %}{{ active_class }}{% else %}{{ inactive_class }}{% endif %}
+                              transition-all group">
+                        <i class="fas fa-user-cog w-5 text-center {% if current_path == usuarios_url %}text-accent{% endif %} group-hover:text-accent transition-colors"></i> Usuarios
+                    </a>
+                    {% endif %}
+                    
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                </nav>
+            </div>
+            <div class="mt-auto p-6 border-t border-slate-800">
+                <p class="text-xs text-center text-slate-600">&copy; 2024 ITECH System</p>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50 overflow-y-auto">
+            {% block content %}
+                {% endblock content %}
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+
+            // 🚀 LÓGICA DEL MENÚ HAMBURGUESA
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', function () {
+                    // Alternar la clase para que el menú se deslice visible/oculto
+                    sidebar.classList.toggle('-translate-x-full');
+                    sidebar.classList.toggle('sidebar-active'); 
+                });
+                
+                // CERRAR AL HACER CLIC EN UN ENLACE (Mejora la UX móvil)
+                sidebar.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth < 768) { 
+                            sidebar.classList.remove('sidebar-active');
+                            sidebar.classList.add('-translate-x-full');
+                        }
+                    });
+                });
+                
+                // CERRAR AL HACER CLIC FUERA DEL MENÚ (overlay)
+                window.addEventListener('click', function(event) {
+                    // Verificar si el clic fue en el overlay (fuera del sidebar y fuera del toggle)
+                    if (window.innerWidth < 768 && 
+                        !sidebar.contains(event.target) && 
+                        !menuToggle.contains(event.target) && 
+                        sidebar.classList.contains('sidebar-active')) 
+                    {
+                        sidebar.classList.remove('sidebar-active');
+                        sidebar.classList.add('-translate-x-full');
+                    }
+                });
+            }
+            
+            // 💡 Scripts específicos de cada vista se ejecutan desde el bloque content.
+            // Esto asegura que FullCalendar solo se inicie en la página correcta.
+            {% block extra_js %}{% endblock extra_js %}
+        });
+    </script>
+</body>
+</html>

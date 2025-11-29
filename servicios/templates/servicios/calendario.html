@@ -1,0 +1,465 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario de Servicios | ITECH</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0F172A', // Azul oscuro elegante
+                        accent: '#2563EB',  // Azul brillante para acciones
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Mantenemos tus variables para los componentes internos del calendario */
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --info-color: #17a2b8;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-bg: #f8f9fa;
+            --dark-bg: #343a40;
+            --text-color: #333;
+            --light-text-color: #fff;
+            --border-color: #dee2e6;
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* --- Estilos Específicos para FullCalendar --- */
+        #calendar {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+            flex: 1;
+            min-height: 600px; /* Altura mínima para que se vea bien */
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color); /* Usamos el azul oscuro de Tailwind */
+        }
+
+        .fc-toolbar-chunk button {
+            background-color: #2563EB !important; /* Tailwind Accent */
+            color: #fff !important;
+            border: none !important;
+            border-radius: 6px !important;
+            padding: 8px 12px !important;
+            font-weight: 500 !important;
+            text-transform: capitalize !important;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .fc-toolbar-chunk button:hover {
+            background-color: #1d4ed8 !important; /* Darker blue */
+        }
+
+        .fc-toolbar-chunk .fc-button-active {
+            background-color: #1e40af !important; /* Even darker blue */
+        }
+
+        .fc-today-button {
+            background-color: #64748b !important; /* Slate 500 */
+            opacity: 1 !important;
+        }
+
+        .fc-today-button:disabled {
+            opacity: 0.6 !important;
+        }
+
+        /* --- Estilos de la Barra de Herramientas (Filtros) --- */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .filters select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background-color: #fff;
+            font-size: 0.9rem;
+            color: #334155;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        
+        .filters select:focus {
+            border-color: #2563EB;
+            ring: 2px solid #2563EB;
+        }
+
+        .toolbar-actions button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #btn_nueva {
+            background-color: #10b981; /* Emerald 500 */
+            color: #fff;
+        }
+        #btn_nueva:hover { background-color: #059669; }
+
+        #btn_xls {
+            background-color: #0ea5e9; /* Sky 500 */
+            color: #fff;
+        }
+        #btn_xls:hover { background-color: #0284c7; }
+
+        .toolbar-actions .settings-btn {
+            background-color: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+        }
+        .toolbar-actions .settings-btn:hover { background-color: #e2e8f0; }
+
+        /* --- Tooltip (Caja Negra) --- */
+        .event-tooltip {
+            position: absolute; top: 0; left: 0; z-index: 9999; width: 300px;
+            background: rgba(15, 23, 42, 0.95); /* Slate 900 con opacidad */
+            color: white; padding: 15px; border-radius: 8px; pointer-events: none;
+            transform: translate(-50%, 0); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            font-size: 0.85rem; display: none; backdrop-filter: blur(4px);
+        }
+        .tooltip-title { font-weight: 700; color: #fbbf24; font-size: 1rem; margin-bottom: 8px; display: block; }
+        .tooltip-label { color: #94a3b8; margin-top: 4px; display: block; }
+        
+        /* Modal (Para el futuro uso, si decides activarlo) */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background-color: #fff; padding: 20px; border-radius: 8px; width: 600px; max-width: 90%; }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden font-sans">
+
+    <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-20 shrink-0">
+    <div class="flex items-center gap-4">
+        <button id="menu-toggle" class="md:hidden text-slate-600 hover:text-accent p-2 rounded">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+        
+        <div class="flex items-center gap-2">
+            <img src="{% static 'img/logo.JPEG' %}" alt="Logo" class="h-8 w-auto object-contain">
+            <span class="font-bold text-xl tracking-tight text-slate-900">ITECH</span>
+        </div>
+        <div class="hidden md:flex h-6 w-px bg-slate-300 mx-2"></div>
+        <span class="hidden md:block text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">
+            <i class="fas fa-headset mr-1"></i> Soporte: +52 999 456 7891
+        </span>
+    </div>
+
+    </nav>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <aside class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10">
+            <div class="p-6">
+                <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4">Menú Principal</p>
+                <nav class="space-y-1">
+    
+    <a href="{% url 'vista_calendario' %}" 
+       class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
+        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
+    </a>
+
+     <a href="{% url 'lista_ordenes' %}" 
+       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
+    </a>
+    
+    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
+    <a href="{% url 'lista_reportes_pendientes' %}" 
+       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
+    </a>
+    {% endif %}
+
+    {% if request.user.Rol == 'Administrador' %}
+    
+    <a href="{% url 'lista_clientes' %}" 
+       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
+    </a>
+
+
+    <a href="{% url 'gestion_usuarios' %}" 
+       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
+    </a>
+    {% endif %}
+
+</nav>
+            </div>
+            <div class="mt-auto p-6 border-t border-slate-800">
+                <p class="text-xs text-center text-slate-600">&copy; 2024 ITECH System</p>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50">
+            
+            <div class="px-8 py-6 pb-2 shrink-0">
+                <div class="flex items-center gap-3 mb-1">
+                    <div class="p-2 bg-blue-100 text-accent rounded-lg">
+                        <i class="fas fa-calendar-check text-xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-slate-800">Calendario de Servicios</h1>
+                </div>
+                <p class="text-slate-500 text-sm ml-12">Visualiza y gestiona la programación de servicios técnicos.</p>
+            </div>
+
+            <div class="flex-1 p-6 sm:px-8 pt-4 overflow-y-auto custom-scrollbar flex flex-col">
+                
+                <div class="toolbar">
+                    <div class="filters">
+                        <select id="filter_cliente">
+                            <option value="Todos" selected>Todos los Clientes</option>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente.ClienteID }}">{{ cliente.NombreComercial }}</option>
+                            {% endfor %}
+                        </select>
+                        <select id="filter_personal">
+                            <option value="Todos" selected>Todo el Personal</option>
+                            {% for p in personal %}
+                                <option value="{{ p.UsuarioID }}">{{ p.Nombre }} {{ p.Apellido }}</option>
+                            {% endfor %}
+                        </select>
+                        <select id="filter_estado_orden">
+                            <option value="Todos">Estado Orden - Todos</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Terminada">Terminada</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button id="btn_nueva"><i class="fas fa-plus"></i> Nueva Actividad</button>
+                        <button id="btn_xls"><i class="fas fa-file-excel"></i> Exportar XLS</button>
+                        <button class="settings-btn"><i class="fas fa-cog"></i></button>
+                    </div>
+                </div>
+
+                <div id="calendar"></div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="activityModal" class="modal">
+        <div class="modal-content">
+            <div style="text-align: center; padding: 20px;">
+                <h3 style="font-weight: bold; margin-bottom: 10px;">Redirigiendo...</h3>
+                <p>Cargando formulario de nueva orden...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ⚠️ Importante: Definir la URL base para el PDF/Reporte y el Rol del usuario
+    // Las URL base deben estar fuera de DOMContentLoaded para ser accesibles.
+    const PDF_URL_BASE = "{% url 'ver_reporte' 0 %}";
+    const EDIT_URL_BASE = "{% url 'editar_orden' 0 %}";
+    // ✅ URL para la página de Registro Técnico (Generar Reporte)
+    const REGISTRO_URL_BASE = "{% url 'registro_temp' 0 %}";
+    const userRole = "{{ user.Rol }}";
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // 1. Elementos DOM
+        const calendarEl = document.getElementById('calendar');
+        const btnNueva = document.getElementById('btn_nueva');
+
+        // 2. Tooltip
+        const tooltip = document.createElement('div');
+        tooltip.className = 'event-tooltip'; 
+        document.body.appendChild(tooltip);
+
+        // 3. Redirección al botón "Nueva Actividad"
+        // 3. Redirección al botón "Nueva Actividad" (CORREGIDO)
+btnNueva.addEventListener('click', () => {
+    
+    // 👑 Lógica para el Administrador
+    if (userRole === 'Administrador') {
+        // El Administrador va a la vista de creación/gestión de órdenes
+        window.location.href = "{% url 'lista_ordenes' %}?open_modal=true";
+    } 
+    // 🧑‍🔧 Lógica para el Técnico (y otros roles sin permisos especiales)
+    else {
+        // El Técnico va a su dashboard principal (Generar Reporte/Registro)
+        window.location.href = "{% url 'lista_reportes_pendientes' %}";
+    }
+});
+
+        // 4. Inicialización de FullCalendar
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'es',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+            },
+            buttonText: {
+                today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día', list: 'Lista'
+            },
+            height: 'auto', 
+            contentHeight: 'auto',
+
+            // Fuente de datos
+            events: {
+                url: "{% url 'calendario_data' %}",
+                method: 'GET',
+                extraParams: function () {
+                    return {
+                        cliente: document.getElementById('filter_cliente').value,
+                        personal: document.getElementById('filter_personal').value,
+                        // Nota: Se asume que filter_estado_actividad no es necesario si solo usas estado_orden
+                        estado_orden: document.getElementById('filter_estado_orden').value,
+                    };
+                },
+                failure: function () {
+                    alert('Hubo un error al cargar las órdenes.');
+                }
+            },
+
+            // Tooltip al pasar el mouse (se mantiene intacto)
+            eventDidMount: function (info) {
+                // Lógica de Tooltip se mantiene
+                info.el.addEventListener('mouseenter', function () {
+                    const props = info.event.extendedProps;
+                    
+                    tooltip.innerHTML = `
+                        <span class="tooltip-title">${info.event.title}</span>
+                        <span style="font-weight: bold; display: block; margin-bottom: 5px; color: #e2e8f0;">
+                            <i class="fas fa-user-circle"></i> ${props.cliente_nombre || 'N/A'}
+                        </span>
+                        <hr style="border-top: 1px solid #475569; margin: 8px 0;">
+                        <span class="tooltip-label"><i class="fas fa-phone-alt"></i> ${props.telefono || 'N/A'}</span>
+                        <span class="tooltip-label"><i class="fas fa-map-marker-alt"></i> ${props.ubicacion || 'N/A'}</span>
+                        <span class="tooltip-label"><i class="fas fa-hard-hat"></i> ${props.asignado || 'N/A'}</span>
+                        <span class="tooltip-label" style="font-weight: bold; color: #4ade80; margin-top: 10px; text-transform: uppercase;">
+                            ${props.estado_orden || 'N/A'}
+                        </span>
+                    `;
+
+                    tooltip.style.display = 'block';
+                    const rect = info.el.getBoundingClientRect();
+                    tooltip.style.left = (rect.left + rect.width / 2) + 'px';
+                    tooltip.style.top = (rect.bottom + 5) + 'px';
+                    tooltip.style.transform = 'translateX(-50%)';
+                });
+
+                info.el.addEventListener('mouseleave', function () {
+                    tooltip.style.display = 'none';
+                });
+            },
+
+            // 🚀 CLIC EN EVENTO (Lógica de PDF/Aviso y Edición) 🚀
+            eventClick: function (info) {
+                info.jsEvent.preventDefault();
+                
+                const ordenID = info.event.id;
+                const estado = info.event.extendedProps.estado_orden;
+                
+                if (estado === 'Terminada' || estado === 'Completada') {
+                    // 1. Abrir PDF en nueva pestaña si está terminado
+                    const pdfUrl = PDF_URL_BASE.replace('0', ordenID);
+                    window.open(pdfUrl, '_blank');
+                    
+                } else if (userRole === 'Administrador') {
+                    // 2. Si es Administrador, siempre va a la vista de edición/detalle
+                    const editUrl = EDIT_URL_BASE.replace('0', ordenID);
+                    window.location.href = editUrl;
+                    
+                } else if (estado === 'Pendiente' || estado === 'Activa' || estado === 'En Proceso') {
+                    
+                    // 3. LÓGICA CLAVE: Técnico/Soporte Pendiente
+                    if (userRole === 'Técnico') {
+                        const urlRegistro = REGISTRO_URL_BASE.replace('0', ordenID);
+                        
+                        // Diálogo de confirmación para ir a generar reporte
+                        if (confirm(`La Orden #${ordenID} está PENDIENTE.\n\n¿Deseas ir ahora a GENERAR EL REPORTE TÉCNICO?`)) {
+                            window.location.href = urlRegistro;
+                        } else {
+                            // Si el técnico cancela, solo se le da un aviso
+                            alert(`El Reporte Final (PDF) para la Orden #${ordenID} no está disponible hasta que completes el servicio.`);
+                        }
+                    } else {
+                        // 4. Si es Soporte/Consultor, solo aviso de lectura
+                        alert(`⚠️ La Orden #${ordenID} está en estado: ${estado}. Tienes acceso de solo lectura.`);
+                    }
+                
+                } else if (info.event.url) {
+                    // 5. Fallback para URLs no mapeadas
+                    window.location.href = info.event.url; 
+                }
+            },
+            editable: false
+        });
+
+        calendar.render();
+
+        // 6. Reactividad de Filtros
+        // Nota: Asegúrate de que los filtros de actividad que no uses no causen errores si los eliminas del HTML.
+        ['filter_cliente', 'filter_personal', 'filter_estado_orden'].forEach(id => {
+            const filterElement = document.getElementById(id);
+            if (filterElement) {
+                filterElement.addEventListener('change', () => calendar.refetchEvents());
+            }
+        });
+    });
+</script>
+</body>
+</html>
