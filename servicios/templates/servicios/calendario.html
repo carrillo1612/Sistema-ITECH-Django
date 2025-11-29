@@ -6,12 +6,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendario de Servicios | ITECH</title>
-    
+
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
 
@@ -25,7 +25,7 @@
                     },
                     colors: {
                         primary: '#0F172A', // Azul oscuro elegante
-                        accent: '#2563EB',  // Azul brillante para acciones
+                        accent: '#2563EB', // Azul brillante para acciones
                     }
                 }
             }
@@ -49,48 +49,76 @@
         }
 
         /* Scrollbar personalizada */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
 
-        /* --- Estilos Específicos para FullCalendar --- */
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* --- Estilos Específicos para FullCalendar (Ajuste Responsive) --- */
         #calendar {
             background: #fff;
-            padding: 20px;
+            padding: 10px; /* Reducimos padding para móviles */
             border-radius: 8px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
             flex: 1;
-            min-height: 600px; /* Altura mínima para que se vea bien */
+            min-height: 400px; /* Reducimos la altura mínima para móvil */
+        }
+
+        /* Ajuste para la Barra de Título y Botones */
+        .fc-header-toolbar.fc-toolbar {
+            flex-direction: column; /* Coloca los elementos en columna por defecto (móvil) */
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        @media (min-width: 768px) { /* A partir de md (768px), vuelve a ser horizontal */
+            .fc-header-toolbar.fc-toolbar {
+                flex-direction: row;
+                align-items: center;
+            }
         }
 
         .fc .fc-toolbar-title {
-            font-size: 1.5rem;
+            font-size: 1.25rem; /* Menor en móvil */
             font-weight: 700;
-            color: var(--primary-color); /* Usamos el azul oscuro de Tailwind */
+            color: var(--primary-color);
         }
 
         .fc-toolbar-chunk button {
-            background-color: #2563EB !important; /* Tailwind Accent */
+            background-color: #2563EB !important;
             color: #fff !important;
             border: none !important;
             border-radius: 6px !important;
-            padding: 8px 12px !important;
+            padding: 6px 10px !important; /* Más pequeño en móvil */
             font-weight: 500 !important;
             text-transform: capitalize !important;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+            font-size: 0.8rem !important;
         }
 
         .fc-toolbar-chunk button:hover {
-            background-color: #1d4ed8 !important; /* Darker blue */
+            background-color: #1d4ed8 !important;
         }
 
         .fc-toolbar-chunk .fc-button-active {
-            background-color: #1e40af !important; /* Even darker blue */
+            background-color: #1e40af !important;
         }
 
         .fc-today-button {
-            background-color: #64748b !important; /* Slate 500 */
+            background-color: #64748b !important;
             opacity: 1 !important;
         }
 
@@ -98,26 +126,34 @@
             opacity: 0.6 !important;
         }
 
-        /* --- Estilos de la Barra de Herramientas (Filtros) --- */
+        /* --- Estilos de la Barra de Herramientas (Filtros) Responsive --- */
         .toolbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 15px;
+            gap: 10px; /* Reducir gap */
             margin-bottom: 20px;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Esencial para el responsive */
             background-color: #fff;
-            padding: 15px;
+            padding: 10px; /* Reducir padding */
             border-radius: 8px;
             border: 1px solid #e2e8f0;
         }
 
         .filters {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
             flex-wrap: wrap;
-            flex: 1;
+            flex-basis: 100%; /* Ocupa todo el ancho en móvil */
+            justify-content: space-between;
+        }
+
+        @media (min-width: 640px) { /* En desktop/tablet, vuelve a ser flexible */
+            .filters {
+                flex-basis: auto;
+                flex: 1;
+            }
         }
 
         .filters select {
@@ -129,130 +165,204 @@
             color: #334155;
             outline: none;
             transition: border-color 0.15s;
+            flex-grow: 1; /* Ocupa el espacio disponible */
         }
-        
+
         .filters select:focus {
             border-color: #2563EB;
             ring: 2px solid #2563EB;
         }
 
+        .toolbar-actions {
+            flex-basis: 100%; /* Ocupa todo el ancho en móvil */
+            display: flex;
+            gap: 8px;
+            justify-content: space-between;
+        }
+        
+        @media (min-width: 640px) {
+            .toolbar-actions {
+                flex-basis: auto;
+                justify-content: flex-end;
+            }
+        }
+
         .toolbar-actions button {
-            padding: 8px 16px;
+            padding: 8px 12px;
             border-radius: 6px;
             border: none;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem; /* Pequeño en móvil */
             font-weight: 500;
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            flex: 1; /* Distribuye el espacio entre botones en móvil */
         }
+        
+        @media (min-width: 640px) {
+            .toolbar-actions button {
+                flex: none; /* Vuelve al tamaño normal en desktop */
+            }
+        }
+
 
         #btn_nueva {
-            background-color: #10b981; /* Emerald 500 */
+            background-color: #10b981;
             color: #fff;
         }
-        #btn_nueva:hover { background-color: #059669; }
+
+        #btn_nueva:hover {
+            background-color: #059669;
+        }
 
         #btn_xls {
-            background-color: #0ea5e9; /* Sky 500 */
+            background-color: #0ea5e9;
             color: #fff;
         }
-        #btn_xls:hover { background-color: #0284c7; }
+
+        #btn_xls:hover {
+            background-color: #0284c7;
+        }
 
         .toolbar-actions .settings-btn {
             background-color: #f1f5f9;
             color: #64748b;
             border: 1px solid #cbd5e1;
         }
-        .toolbar-actions .settings-btn:hover { background-color: #e2e8f0; }
+
+        .toolbar-actions .settings-btn:hover {
+            background-color: #e2e8f0;
+        }
 
         /* --- Tooltip (Caja Negra) --- */
         .event-tooltip {
-            position: absolute; top: 0; left: 0; z-index: 9999; width: 300px;
-            background: rgba(15, 23, 42, 0.95); /* Slate 900 con opacidad */
-            color: white; padding: 15px; border-radius: 8px; pointer-events: none;
-            transform: translate(-50%, 0); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-            font-size: 0.85rem; display: none; backdrop-filter: blur(4px);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 9999;
+            width: 300px;
+            background: rgba(15, 23, 42, 0.95);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            pointer-events: none;
+            transform: translate(-50%, 0);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            font-size: 0.85rem;
+            display: none;
+            backdrop-filter: blur(4px);
         }
-        .tooltip-title { font-weight: 700; color: #fbbf24; font-size: 1rem; margin-bottom: 8px; display: block; }
-        .tooltip-label { color: #94a3b8; margin-top: 4px; display: block; }
-        
+
+        .tooltip-title {
+            font-weight: 700;
+            color: #fbbf24;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .tooltip-label {
+            color: #94a3b8;
+            margin-top: 4px;
+            display: block;
+        }
+
         /* Modal (Para el futuro uso, si decides activarlo) */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal-content { background-color: #fff; padding: 20px; border-radius: 8px; width: 600px; max-width: 90%; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 600px;
+            max-width: 90%;
+        }
     </style>
 </head>
 
 <body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden font-sans">
 
     <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-20 shrink-0">
-    <div class="flex items-center gap-4">
-        <button id="menu-toggle" class="md:hidden text-slate-600 hover:text-accent p-2 rounded">
-            <i class="fas fa-bars text-xl"></i>
-        </button>
-        
-        <div class="flex items-center gap-2">
-            <img src="{% static 'img/logo.JPEG' %}" alt="Logo" class="h-8 w-auto object-contain">
-            <span class="font-bold text-xl tracking-tight text-slate-900">ITECH</span>
+        <div class="flex items-center gap-4">
+            <button id="menu-toggle" class="md:hidden text-slate-600 hover:text-accent p-2 rounded">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+
+            <div class="flex items-center gap-2">
+                <img src="{% static 'img/logo.JPEG' %}" alt="Logo" class="h-8 w-auto object-contain">
+                <span class="font-bold text-xl tracking-tight text-slate-900">ITECH</span>
+            </div>
+            <div class="hidden md:flex h-6 w-px bg-slate-300 mx-2"></div>
+            <span
+                class="hidden md:block text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">
+                <i class="fas fa-headset mr-1"></i> Soporte: +52 999 456 7891
+            </span>
         </div>
-        <div class="hidden md:flex h-6 w-px bg-slate-300 mx-2"></div>
-        <span class="hidden md:block text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">
-            <i class="fas fa-headset mr-1"></i> Soporte: +52 999 456 7891
-        </span>
-    </div>
 
     </nav>
 
     <div class="flex flex-1 overflow-hidden">
-        
-        <aside class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10">
-            <div class="p-6">
+
+        <aside id="sidebar"
+            class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10 transition-all duration-300">
+            <div class="p-6 overflow-y-auto flex-1">
                 <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4">Menú Principal</p>
                 <nav class="space-y-1">
-    
-    <a href="{% url 'vista_calendario' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
-        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
-    </a>
 
-     <a href="{% url 'lista_ordenes' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
-    </a>
-    
-    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
-    <a href="{% url 'lista_reportes_pendientes' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
-    </a>
-    {% endif %}
+                    <a href="{% url 'vista_calendario' %}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
+                        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
+                    </a>
 
-    {% if request.user.Rol == 'Administrador' %}
-    
-    <a href="{% url 'lista_clientes' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
-    </a>
+                    <a href="{% url 'lista_ordenes' %}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
+                    </a>
+
+                    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
+                    <a href="{% url 'lista_reportes_pendientes' %}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
+                    </a>
+                    {% endif %}
+
+                    {% if request.user.Rol == 'Administrador' %}
+
+                    <a href="{% url 'lista_clientes' %}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
+                    </a>
 
 
-    <a href="{% url 'gestion_usuarios' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
-    </a>
-    {% endif %}
+                    <a href="{% url 'gestion_usuarios' %}"
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
+                    </a>
+                    {% endif %}
 
-</nav>
+                </nav>
             </div>
-            <div class="mt-auto p-6 border-t border-slate-800">
+            <div class="mt-auto p-6 border-t border-slate-800 shrink-0">
                 <p class="text-xs text-center text-slate-600">&copy; 2024 ITECH System</p>
             </div>
         </aside>
 
         <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50">
-            
-            <div class="px-8 py-6 pb-2 shrink-0">
+
+            <div class="px-6 sm:px-8 py-6 pb-2 shrink-0">
                 <div class="flex items-center gap-3 mb-1">
                     <div class="p-2 bg-blue-100 text-accent rounded-lg">
                         <i class="fas fa-calendar-check text-xl"></i>
@@ -263,19 +373,19 @@
             </div>
 
             <div class="flex-1 p-6 sm:px-8 pt-4 overflow-y-auto custom-scrollbar flex flex-col">
-                
+
                 <div class="toolbar">
                     <div class="filters">
                         <select id="filter_cliente">
                             <option value="Todos" selected>Todos los Clientes</option>
                             {% for cliente in clientes %}
-                                <option value="{{ cliente.ClienteID }}">{{ cliente.NombreComercial }}</option>
+                            <option value="{{ cliente.ClienteID }}">{{ cliente.NombreComercial }}</option>
                             {% endfor %}
                         </select>
                         <select id="filter_personal">
                             <option value="Todos" selected>Todo el Personal</option>
                             {% for p in personal %}
-                                <option value="{{ p.UsuarioID }}">{{ p.Nombre }} {{ p.Apellido }}</option>
+                            <option value="{{ p.UsuarioID }}">{{ p.Nombre }} {{ p.Apellido }}</option>
                             {% endfor %}
                         </select>
                         <select id="filter_estado_orden">
@@ -285,8 +395,8 @@
                         </select>
                     </div>
                     <div class="toolbar-actions">
-                        <button id="btn_nueva"><i class="fas fa-plus"></i> Nueva Actividad</button>
-                        <button id="btn_xls"><i class="fas fa-file-excel"></i> Exportar XLS</button>
+                        <button id="btn_nueva"><i class="fas fa-plus"></i> Nueva</button>
+                        <button id="btn_xls"><i class="fas fa-file-excel"></i> Exportar</button>
                         <button class="settings-btn"><i class="fas fa-cog"></i></button>
                     </div>
                 </div>
@@ -307,159 +417,184 @@
     </div>
 
     <script>
-    // ⚠️ Importante: Definir la URL base para el PDF/Reporte y el Rol del usuario
-    // Las URL base deben estar fuera de DOMContentLoaded para ser accesibles.
-    const PDF_URL_BASE = "{% url 'ver_reporte' 0 %}";
-    const EDIT_URL_BASE = "{% url 'editar_orden' 0 %}";
-    // ✅ URL para la página de Registro Técnico (Generar Reporte)
-    const REGISTRO_URL_BASE = "{% url 'registro_temp' 0 %}";
-    const userRole = "{{ user.Rol }}";
+        // ⚠️ Importante: Definir la URL base para el PDF/Reporte y el Rol del usuario
+        const PDF_URL_BASE = "{% url 'ver_reporte' 0 %}";
+        const EDIT_URL_BASE = "{% url 'editar_orden' 0 %}";
+        // ✅ URL para la página de Registro Técnico (Generar Reporte)
+        const REGISTRO_URL_BASE = "{% url 'registro_temp' 0 %}";
+        const userRole = "{{ user.Rol }}";
 
-    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
 
-        // 1. Elementos DOM
-        const calendarEl = document.getElementById('calendar');
-        const btnNueva = document.getElementById('btn_nueva');
+            // 1. Elementos DOM
+            const calendarEl = document.getElementById('calendar');
+            const btnNueva = document.getElementById('btn_nueva');
+            
+            // NUEVOS ELEMENTOS PARA RESPONSIVE
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('main');
 
-        // 2. Tooltip
-        const tooltip = document.createElement('div');
-        tooltip.className = 'event-tooltip'; 
-        document.body.appendChild(tooltip);
+            // 2. Lógica de Toggling del Menú Lateral en Móviles
+            menuToggle.addEventListener('click', () => {
+                const isHidden = sidebar.classList.contains('hidden');
+                
+                if (isHidden) {
+                    // Mostrar menú en modo overlay (absoluto) para móviles
+                    sidebar.classList.remove('hidden', 'md:flex');
+                    sidebar.classList.add('absolute', 'inset-y-0', 'left-0', 'z-50', 'flex', 'h-full');
+                } else {
+                    // Ocultar menú
+                    sidebar.classList.add('hidden', 'md:flex');
+                    sidebar.classList.remove('absolute', 'inset-y-0', 'left-0', 'z-50', 'flex', 'h-full');
+                }
+            });
 
-        // 3. Redirección al botón "Nueva Actividad"
-        // 3. Redirección al botón "Nueva Actividad" (CORREGIDO)
-btnNueva.addEventListener('click', () => {
-    
-    // 👑 Lógica para el Administrador
-    if (userRole === 'Administrador') {
-        // El Administrador va a la vista de creación/gestión de órdenes
-        window.location.href = "{% url 'lista_ordenes' %}?open_modal=true";
-    } 
-    // 🧑‍🔧 Lógica para el Técnico (y otros roles sin permisos especiales)
-    else {
-        // El Técnico va a su dashboard principal (Generar Reporte/Registro)
-        window.location.href = "{% url 'lista_reportes_pendientes' %}";
-    }
-});
+            // 3. Tooltip
+            const tooltip = document.createElement('div');
+            tooltip.className = 'event-tooltip';
+            document.body.appendChild(tooltip);
 
-        // 4. Inicialización de FullCalendar
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            locale: 'es',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-            },
-            buttonText: {
-                today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día', list: 'Lista'
-            },
-            height: 'auto', 
-            contentHeight: 'auto',
+            // 4. Redirección al botón "Nueva Actividad"
+            btnNueva.addEventListener('click', () => {
 
-            // Fuente de datos
-            events: {
-                url: "{% url 'calendario_data' %}",
-                method: 'GET',
-                extraParams: function () {
-                    return {
-                        cliente: document.getElementById('filter_cliente').value,
-                        personal: document.getElementById('filter_personal').value,
-                        // Nota: Se asume que filter_estado_actividad no es necesario si solo usas estado_orden
-                        estado_orden: document.getElementById('filter_estado_orden').value,
-                    };
+                // 👑 Lógica para el Administrador
+                if (userRole === 'Administrador') {
+                    // El Administrador va a la vista de creación/gestión de órdenes
+                    window.location.href = "{% url 'lista_ordenes' %}?open_modal=true";
+                }
+                // 🧑‍🔧 Lógica para el Técnico (y otros roles sin permisos especiales)
+                else {
+                    // El Técnico va a su dashboard principal (Generar Reporte/Registro)
+                    window.location.href = "{% url 'lista_reportes_pendientes' %}";
+                }
+            });
+
+            // 5. Inicialización de FullCalendar
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
                 },
-                failure: function () {
-                    alert('Hubo un error al cargar las órdenes.');
-                }
-            },
-
-            // Tooltip al pasar el mouse (se mantiene intacto)
-            eventDidMount: function (info) {
-                // Lógica de Tooltip se mantiene
-                info.el.addEventListener('mouseenter', function () {
-                    const props = info.event.extendedProps;
-                    
-                    tooltip.innerHTML = `
-                        <span class="tooltip-title">${info.event.title}</span>
-                        <span style="font-weight: bold; display: block; margin-bottom: 5px; color: #e2e8f0;">
-                            <i class="fas fa-user-circle"></i> ${props.cliente_nombre || 'N/A'}
-                        </span>
-                        <hr style="border-top: 1px solid #475569; margin: 8px 0;">
-                        <span class="tooltip-label"><i class="fas fa-phone-alt"></i> ${props.telefono || 'N/A'}</span>
-                        <span class="tooltip-label"><i class="fas fa-map-marker-alt"></i> ${props.ubicacion || 'N/A'}</span>
-                        <span class="tooltip-label"><i class="fas fa-hard-hat"></i> ${props.asignado || 'N/A'}</span>
-                        <span class="tooltip-label" style="font-weight: bold; color: #4ade80; margin-top: 10px; text-transform: uppercase;">
-                            ${props.estado_orden || 'N/A'}
-                        </span>
-                    `;
-
-                    tooltip.style.display = 'block';
-                    const rect = info.el.getBoundingClientRect();
-                    tooltip.style.left = (rect.left + rect.width / 2) + 'px';
-                    tooltip.style.top = (rect.bottom + 5) + 'px';
-                    tooltip.style.transform = 'translateX(-50%)';
-                });
-
-                info.el.addEventListener('mouseleave', function () {
-                    tooltip.style.display = 'none';
-                });
-            },
-
-            // 🚀 CLIC EN EVENTO (Lógica de PDF/Aviso y Edición) 🚀
-            eventClick: function (info) {
-                info.jsEvent.preventDefault();
-                
-                const ordenID = info.event.id;
-                const estado = info.event.extendedProps.estado_orden;
-                
-                if (estado === 'Terminada' || estado === 'Completada') {
-                    // 1. Abrir PDF en nueva pestaña si está terminado
-                    const pdfUrl = PDF_URL_BASE.replace('0', ordenID);
-                    window.open(pdfUrl, '_blank');
-                    
-                } else if (userRole === 'Administrador') {
-                    // 2. Si es Administrador, siempre va a la vista de edición/detalle
-                    const editUrl = EDIT_URL_BASE.replace('0', ordenID);
-                    window.location.href = editUrl;
-                    
-                } else if (estado === 'Pendiente' || estado === 'Activa' || estado === 'En Proceso') {
-                    
-                    // 3. LÓGICA CLAVE: Técnico/Soporte Pendiente
-                    if (userRole === 'Técnico') {
-                        const urlRegistro = REGISTRO_URL_BASE.replace('0', ordenID);
-                        
-                        // Diálogo de confirmación para ir a generar reporte
-                        if (confirm(`La Orden #${ordenID} está PENDIENTE.\n\n¿Deseas ir ahora a GENERAR EL REPORTE TÉCNICO?`)) {
-                            window.location.href = urlRegistro;
-                        } else {
-                            // Si el técnico cancela, solo se le da un aviso
-                            alert(`El Reporte Final (PDF) para la Orden #${ordenID} no está disponible hasta que completes el servicio.`);
-                        }
-                    } else {
-                        // 4. Si es Soporte/Consultor, solo aviso de lectura
-                        alert(`⚠️ La Orden #${ordenID} está en estado: ${estado}. Tienes acceso de solo lectura.`);
+                buttonText: {
+                    today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día', list: 'Lista'
+                },
+                height: 'auto',
+                contentHeight: 'auto',
+                // Hacer los eventos DRAGGABLE si el rol es Admin (opcional)
+                editable: userRole === 'Administrador',
+                eventDrop: userRole === 'Administrador' ? function(info) {
+                    // Aquí iría la lógica AJAX para actualizar la fecha/hora en el servidor
+                    if (!confirm("¿Estás seguro de mover esta orden al " + info.event.startStr + "?")) {
+                        info.revert();
                     }
+                } : null,
+
+                // Fuente de datos
+                events: {
+                    url: "{% url 'calendario_data' %}",
+                    method: 'GET',
+                    extraParams: function () {
+                        return {
+                            cliente: document.getElementById('filter_cliente').value,
+                            personal: document.getElementById('filter_personal').value,
+                            estado_orden: document.getElementById('filter_estado_orden').value,
+                        };
+                    },
+                    failure: function () {
+                        alert('Hubo un error al cargar las órdenes.');
+                    }
+                },
+
+                // Tooltip al pasar el mouse
+                eventDidMount: function (info) {
+                    info.el.addEventListener('mouseenter', function () {
+                        const props = info.event.extendedProps;
+
+                        tooltip.innerHTML = `
+                            <span class="tooltip-title">${info.event.title}</span>
+                            <span style="font-weight: bold; display: block; margin-bottom: 5px; color: #e2e8f0;">
+                                <i class="fas fa-user-circle"></i> ${props.cliente_nombre || 'N/A'}
+                            </span>
+                            <hr style="border-top: 1px solid #475569; margin: 8px 0;">
+                            <span class="tooltip-label"><i class="fas fa-phone-alt"></i> ${props.telefono || 'N/A'}</span>
+                            <span class="tooltip-label"><i class="fas fa-map-marker-alt"></i> ${props.ubicacion || 'N/A'}</span>
+                            <span class="tooltip-label"><i class="fas fa-hard-hat"></i> ${props.asignado || 'N/A'}</span>
+                            <span class="tooltip-label" style="font-weight: bold; color: ${props.estado_orden === 'Terminada' ? '#fbbf24' : '#4ade80'}; margin-top: 10px; text-transform: uppercase;">
+                                ${props.estado_orden || 'N/A'}
+                            </span>
+                        `;
+
+                        tooltip.style.display = 'block';
+                        const rect = info.el.getBoundingClientRect();
+                        tooltip.style.left = (rect.left + rect.width / 2) + 'px';
+                        tooltip.style.top = (rect.bottom + 5) + 'px';
+                        tooltip.style.transform = 'translateX(-50%)';
+                    });
+
+                    info.el.addEventListener('mouseleave', function () {
+                        tooltip.style.display = 'none';
+                    });
+                },
+
+                // 🚀 CLIC EN EVENTO (Lógica de PDF/Aviso y Edición) 🚀
+                eventClick: function (info) {
+                    info.jsEvent.preventDefault();
+
+                    const ordenID = info.event.id;
+                    const estado = info.event.extendedProps.estado_orden;
+
+                    if (estado === 'Terminada' || estado === 'Completada') {
+                        // 1. Abrir PDF en nueva pestaña si está terminado
+                        const pdfUrl = PDF_URL_BASE.replace('0', ordenID);
+                        window.open(pdfUrl, '_blank');
+
+                    } else if (userRole === 'Administrador') {
+                        // 2. Si es Administrador, siempre va a la vista de edición/detalle
+                        const editUrl = EDIT_URL_BASE.replace('0', ordenID);
+                        window.location.href = editUrl;
+
+                    } else if (estado === 'Pendiente' || estado === 'Activa' || estado === 'En Proceso') {
+
+                        // 3. LÓGICA CLAVE: Técnico/Soporte Pendiente
+                        if (userRole === 'Técnico') {
+                            const urlRegistro = REGISTRO_URL_BASE.replace('0', ordenID);
+
+                            // Diálogo de confirmación para ir a generar reporte
+                            if (confirm(`La Orden #${ordenID} está PENDIENTE.\n\n¿Deseas ir ahora a GENERAR EL REPORTE TÉCNICO?`)) {
+                                window.location.href = urlRegistro;
+                            } else {
+                                // Si el técnico cancela, solo se le da un aviso
+                                alert(`El Reporte Final (PDF) para la Orden #${ordenID} no está disponible hasta que completes el servicio.`);
+                            }
+                        } else {
+                            // 4. Si es Soporte/Consultor, solo aviso de lectura
+                            alert(`⚠️ La Orden #${ordenID} está en estado: ${estado}. Tienes acceso de solo lectura.`);
+                        }
+
+                    } else if (info.event.url) {
+                        // 5. Fallback para URLs no mapeadas
+                        window.location.href = info.event.url;
+                    }
+                },
                 
-                } else if (info.event.url) {
-                    // 5. Fallback para URLs no mapeadas
-                    window.location.href = info.event.url; 
+                // Si no eres administrador, no permites la edición por arrastre
+                editable: userRole === 'Administrador'
+            });
+
+            calendar.render();
+
+            // 6. Reactividad de Filtros
+            ['filter_cliente', 'filter_personal', 'filter_estado_orden'].forEach(id => {
+                const filterElement = document.getElementById(id);
+                if (filterElement) {
+                    filterElement.addEventListener('change', () => calendar.refetchEvents());
                 }
-            },
-            editable: false
+            });
         });
-
-        calendar.render();
-
-        // 6. Reactividad de Filtros
-        // Nota: Asegúrate de que los filtros de actividad que no uses no causen errores si los eliminas del HTML.
-        ['filter_cliente', 'filter_personal', 'filter_estado_orden'].forEach(id => {
-            const filterElement = document.getElementById(id);
-            if (filterElement) {
-                filterElement.addEventListener('change', () => calendar.refetchEvents());
-            }
-        });
-    });
-</script>
+    </script>
 </body>
 </html>
