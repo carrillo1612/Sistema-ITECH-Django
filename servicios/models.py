@@ -36,9 +36,9 @@ class UsuarioManager(BaseUserManager):
 
         user = self.model(
             CorreoElectronico=self.normalize_email(correo_electronico),
-            Nombre=nombre,
-            Apellido=apellido,
-            **extra_fields
+            # Nombre=nombre,          <-- ¡Línea ELIMINADA!
+            # Apellido=apellido,      <-- ¡Línea ELIMINADA!
+            **extra_fields          # ⬅️ Ahora esto asigna Nombre, Apellido, Rol, etc.
         )
         user.set_password(password)
         user.save(using=self._db)
