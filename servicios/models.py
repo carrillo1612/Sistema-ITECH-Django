@@ -50,8 +50,8 @@ class UsuarioManager(BaseUserManager):
     def create_superuser(self, correo_electronico, password=None, **extra_fields):
         # Esta lógica crea el usuario y establece las propiedades después
         
-        is_staff_val = extra_fields.pop('is_staff', True)
-        is_superuser_val = extra_fields.pop('is_superuser', True)
+       #  is_staff_val = extra_fields.pop('is_staff', True)
+        # is_superuser_val = extra_fields.pop('is_superuser', True)
         
         extra_fields.setdefault('Rol', ROL_ADMIN)
         extra_fields.setdefault('Nombre', 'Admin') 
@@ -61,8 +61,6 @@ class UsuarioManager(BaseUserManager):
         user = self.create_user(correo_electronico, password, **extra_fields)
 
         # 2. Asignar las propiedades que causaban error 'no setter' DESPUÉS
-        user.is_staff = is_staff_val
-        user.is_superuser = is_superuser_val
         user.save(using=self._db) # Guardar los cambios finales
         return user
 
