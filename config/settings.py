@@ -1,6 +1,7 @@
 from pathlib import Path
 import os  # <--- AGREGA ESTA LÍNEA AQUÍ ARRIBA
 from pathlib import Path
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -72,16 +73,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # settings.py
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql', 
-        'NAME': os.environ.get('DB_NAME', 'ITECH_Servicios_DB'), # Lee de variable de entorno o usa el valor por defecto
-        'USER': os.environ.get('DB_USER', 'root'),              # Lee de variable de entorno o usa el valor por defecto
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),          # Lee de variable de entorno o usa el valor por defecto
-        'HOST': os.environ.get('DB_HOST', 'localhost'),         # ¡IMPORTANTE! En producción será la URL del servicio de BD
-        'PORT': '3306',                
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'), # Lee la URL de Render
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
