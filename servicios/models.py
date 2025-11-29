@@ -44,14 +44,25 @@ class UsuarioManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, correo_electronico, password=None, **extra_fields):
-        extra_fields.setdefault('Rol', ROL_ADMIN)
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        # Campos que el Manager necesita para crear el usuario
-        extra_fields.setdefault('Nombre', 'Admin') 
-        extra_fields.setdefault('Apellido', 'Master') 
-        return self.create_user(correo_electronico, password, **extra_fields)
+# CÓDIGO CORREGIDO EN create_superuser (Líneas 47-55, aproximadamente)
+def create_superuser(self, correo_electronico, password=None, **extra_fields):
+    # 1. Almacena los valores y ELIMINA las propiedades para evitar el error 'no setter'
+    is_staff_val = extra_fields.pop('is_staff', True)
+    is_superuser_val = extra_fields.pop('is_superuser', True)
+    
+    # 2. Continúa con la configuración interna del gestor (que añade Nombre y Apellido)
+    extra_fields.setdefault('Rol', ROL_ADMIN)
+    extra_fields.setdefault('Nombre', 'Admin') 
+    extra_fields.setdefault('Apellido', 'Master') 
+    
+    # 3. Crea el usuario SIN pasar is_staff ni is_superuser en extra_fields
+    user = self.create_user(correo_electronico, password, **extra_fields)
+
+    # 4. Asigna los valores de is_staff/is_superuser DESPUÉS de la creación del objeto
+    user.is_staff = is_staff_val
+    user.is_superuser = is_superuser_val
+    user.save(using=self._db) # Guardar los cambios finales
+    return user
 
 # ----------------- MODELO DE USUARIO PERSONALIZADO -----------------
 class Usuarios(AbstractBaseUser):
