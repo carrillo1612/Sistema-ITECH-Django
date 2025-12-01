@@ -110,17 +110,12 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = 'static/'
-# Asegúrate de que esta línea use os.path.join
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-# Define la carpeta donde Django recolectará todos los archivos estáticos
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # <-- ¡AÑADE ESTA LÍNEA!
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+# Define la carpeta donde WhiteNoise trabajará
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # ⬅️ ¡CLAVE!
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
