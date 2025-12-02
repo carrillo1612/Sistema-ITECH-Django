@@ -351,27 +351,37 @@ def gestion_usuarios(request, id=None):
     # --- Lógica de Edición/Creación (POST) ---
     if id:
         usuario_instancia = get_object_or_404(Usuarios, pk=id)
+        # Almacena la contraseña hasheada original para el caso de que no se cambie
         contrasena_original = usuario_instancia.password 
     else:
         usuario_instancia = None
         contrasena_original = None
 
     if request.method == 'POST':
+        # Es necesario pasar request.POST al formulario para que procese los datos
         form = UsuarioForm(request.POST, instance=usuario_instancia)
         
         if form.is_valid():
             try:
+                # Retenemos el guardado para poder modificar la contraseña
                 usuario_guardado = form.save(commit=False)
 
                 nueva_contrasena = form.cleaned_data.get('password') 
                 
+                # 🛠️ ZONA DE CORRECCIÓN CRÍTICA: ENCRIPTAR LA CONTRASEÑA
                 if nueva_contrasena:
-                    # El save() modificado del form lo hashea (o lo harías con make_password)
-                    pass 
-                elif usuario_instancia: 
+                    # Encripta la nueva contraseña antes de guardarla
+                    usuario_guardado.set_password(nueva_contrasena) 
+                
+                elif usuario_instancia and contrasena_original: 
+                    # Si no hay nueva contraseña (campo vacío), mantenemos la hasheada original
                     usuario_guardado.password = contrasena_original 
                 
-                usuario_guardado.save()
+                # ⚠️ Nota: No necesitamos else if, si no es una instancia existente, 
+                # el form.save() ya debería haber manejado la creación inicial de la clave
+                # si fue un nuevo registro. Pero para edición, esto es esencial.
+
+                usuario_guardado.save() # Guarda el objeto con la contraseña encriptada
 
                 accion = "actualizado" if usuario_instancia else "creado"
                 messages.success(request, f"Usuario '{usuario_guardado.Nombre}' {accion} exitosamente.")
@@ -383,9 +393,10 @@ def gestion_usuarios(request, id=None):
     else: # GET para abrir modal de edición
         form = UsuarioForm(instance=usuario_instancia)
         if usuario_instancia:
+            # Asegura que el campo contraseña aparezca vacío en el formulario de edición
             form.fields['password'].initial = '' 
             form.fields['password'].widget.attrs.update({'placeholder': 'Dejar en blanco para no cambiar'})
-            form.fields['password'].required = False
+            form.fields['password'].required = False # Permite que el campo quede vacío si no se edita
 
     # --- 🚀 LÓGICA DE LISTADO Y BÚSQUEDA (GET) 🚀 ---
     
@@ -411,7 +422,8 @@ def gestion_usuarios(request, id=None):
     contexto = {
         'lista_usuarios': usuarios, # Pasamos la QuerySet filtrada o sin filtrar
         'form_usuario': form,
-        'usuario_a_editar': usuario_instancia
+        'usuario_a_editar': usuario_instancia,
+        'query': query # Para mantener el término de búsqueda en el formulario
     }
     return render(request, 'servicios/gestion_usuarios.html', contexto)
 

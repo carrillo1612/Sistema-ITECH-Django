@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Generar Reportes | ITECH</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,19 +15,26 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        primary: '#0F172A', // Azul oscuro elegante
-                        accent: '#2563EB',  // Azul brillante para acciones
+                        primary: '#0F172A',
+                        accent: '#2563EB',
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Scrollbar personalizada */
+        /* Ocultar scrollbar visualmente pero permitir scroll */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Scroll suave en iOS */
+        .smooth-scroll {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Scrollbar personalizada para escritorio */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -35,18 +42,18 @@
     </style>
 </head>
 
-<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden font-sans">
+<body class="bg-slate-100 text-slate-800 h-[100dvh] flex flex-col overflow-hidden font-sans">
 
-    <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-20 shrink-0">
-        <div class="flex items-center gap-4">
+    <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm z-30 shrink-0">
+        <div class="flex items-center gap-3">
+            <button id="mobile-menu-btn" class="lg:hidden text-slate-500 hover:text-slate-700 focus:outline-none p-2">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+
             <div class="flex items-center gap-2">
                 <img src="{% static 'img/logo.jpeg' %}" alt="Logo" class="h-8 w-auto object-contain">
-                <span class="font-bold text-xl tracking-tight text-slate-900">ITECH</span>
+                <span class="font-bold text-lg sm:text-xl tracking-tight text-slate-900 hidden sm:inline">ITECH</span>
             </div>
-            <div class="hidden md:flex h-6 w-px bg-slate-300 mx-2"></div>
-            <span class="hidden md:block text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">
-                <i class="fas fa-headset mr-1"></i> Soporte: +52 933 112 9250
-            </span>
         </div>
 
         <div class="flex items-center gap-3">
@@ -54,129 +61,124 @@
                 <p class="text-sm font-semibold text-slate-700">{{ user.Nombre }} {{ user.Apellido }}</p>
                 <p class="text-xs text-slate-500">{{ user.Rol }}</p>
             </div>
-            <div class="h-10 w-10 bg-accent/10 rounded-full flex items-center justify-center text-accent font-bold border border-accent/20">
+            <div class="h-9 w-9 bg-accent/10 rounded-full flex items-center justify-center text-accent font-bold border border-accent/20">
                 {{ user.Nombre|slice:":1" }}{{ user.Apellido|slice:":1" }}
             </div>
         </div>
     </nav>
 
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1 overflow-hidden relative">
         
-        <aside class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10">
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden transition-opacity opacity-0"></div>
+
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex-col shadow-xl z-40 transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex h-[100dvh] lg:h-auto">
             <div class="p-6">
-                <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4">Menú Principal</p>
-                  <nav class="space-y-1">
-    
-    <a href="{% url 'vista_calendario' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
-        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
-    </a>
+                <div class="flex justify-between items-center mb-6 lg:hidden">
+                    <span class="text-white font-bold text-lg">Menú</span>
+                    <button id="close-sidebar-btn" class="text-slate-400 hover:text-white p-2">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
 
-     <a href="{% url 'lista_ordenes' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
-    </a>
-    
-    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
-    <a href="{% url 'lista_reportes_pendientes' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
-    </a>
-    {% endif %}
+                <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4 hidden lg:block">Menú Principal</p>
+                
+                <nav class="space-y-1">
+                    <a href="{% url 'vista_calendario' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-calendar-alt w-5 text-center group-hover:text-accent transition-colors"></i> Calendario
+                    </a>
+                    
+                    <a href="{% url 'lista_ordenes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
+                    </a>
 
-    {% if request.user.Rol == 'Administrador' %}
-    
-    <a href="{% url 'lista_clientes' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
-    </a>
+                    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
+                    <a href="{% url 'lista_reportes_pendientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
+                        <i class="fas fa-tools w-5 text-center text-accent transition-colors"></i> Generar Reporte
+                    </a>
+                    {% endif %}
 
+                    {% if request.user.Rol == 'Administrador' %}
+                    <a href="{% url 'lista_clientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
+                    </a>
 
-    <a href="{% url 'gestion_usuarios' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
-    </a>
-    {% endif %}
-
-</nav>
+                    <a href="{% url 'gestion_usuarios' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
+                    </a>
+                    {% endif %}
+                </nav>
             </div>
             <div class="mt-auto p-6 border-t border-slate-800">
                 <p class="text-xs text-center text-slate-600">&copy; 2024 ITECH System</p>
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50">
+        <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50 w-full h-full relative">
             
-            <div class="px-8 py-6 pb-2 shrink-0">
+            <div class="px-4 sm:px-8 py-4 sm:py-6 pb-2 shrink-0 bg-slate-50 z-10">
                 <div class="flex items-center gap-3 mb-1">
                     <div class="p-2 bg-blue-100 text-accent rounded-lg">
                         <i class="fas fa-tools text-xl"></i>
                     </div>
-                    <h1 class="text-2xl font-bold text-slate-800">Generar Reportes Técnicos</h1>
+                    <h1 class="text-xl sm:text-2xl font-bold text-slate-800">Generar Reportes</h1>
                 </div>
-                <p class="text-slate-500 text-sm ml-12">Selecciona una orden pendiente para registrar las actividades realizadas.</p>
+                <p class="text-slate-500 text-xs sm:text-sm ml-0 sm:ml-12 mt-2 sm:mt-0">Selecciona una orden pendiente.</p>
             </div>
 
-            <div class="flex-1 p-6 sm:px-8 pt-4 overflow-y-auto custom-scrollbar">
+            <div class="flex-1 px-4 sm:px-8 pt-2 overflow-y-auto smooth-scroll custom-scrollbar pb-24">
                 
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden mb-6">
                     
-                    <div class="p-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
-                        <div class="relative max-w-xs w-full">
+                    <div class="p-4 border-b border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-3">
+                        <div class="relative w-full sm:max-w-xs">
                             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                                 <i class="fas fa-search"></i>
                             </span>
-                            <div class="relative w-full max-w-sm">
-    <form method="GET" action="{% url 'lista_reportes_pendientes' %}" class="w-full">
-        <input type="text" name="q" placeholder="Buscar cliente, folio, servicio..." 
-               value="{{ search_query }}" 
-               class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none pl-10">
-    </form>
-    
-    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-</div>
+                            <form method="GET" action="{% url 'lista_reportes_pendientes' %}" class="w-full">
+                                <input type="text" name="q" value="{{ search_query }}" placeholder="Buscar orden..." class="pl-10 pr-4 py-2 w-full border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-accent/20 focus:border-accent focus:outline-none transition-all">
+                            </form>
                         </div>
-                        <div class="text-xs text-slate-500 font-medium">
-                            Mostrando {{ ordenes_pendientes|length }} pendientes
+                        <div class="text-xs text-slate-500 font-medium w-full sm:w-auto text-right">
+                            {{ ordenes_pendientes|length }} pendientes
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-slate-600">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-sm text-left text-slate-600 min-w-[600px]">
                             <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500">
                                 <tr>
-                                    <th class="px-6 py-3">Folio</th>
-                                    <th class="px-6 py-3">Cliente</th>
-                                    <th class="px-6 py-3">Fecha Programada</th>
-                                    <th class="px-6 py-3">Estado</th>
-                                    <th class="px-6 py-3 text-center">Acción</th>
+                                    <th class="px-4 sm:px-6 py-3">Folio</th>
+                                    <th class="px-4 sm:px-6 py-3">Cliente</th>
+                                    <th class="px-4 sm:px-6 py-3">Fecha</th>
+                                    <th class="px-4 sm:px-6 py-3">Estado</th>
+                                    <th class="px-4 sm:px-6 py-3 text-center">Acción</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-200">
                                 {% for orden in ordenes_pendientes %}
                                 <tr class="hover:bg-slate-50 transition-colors">
-                                    <td class="px-6 py-4 font-bold text-slate-800">
+                                    <td class="px-4 sm:px-6 py-4 font-bold text-slate-800 whitespace-nowrap">
                                         {{ orden.OrdenID }}
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <div class="font-medium text-slate-900">{{ orden.ClienteEmpresa.NombreComercial }}</div>
-                                        <div class="text-xs text-slate-400 mt-0.5">{{ orden.Servicio|default:""|truncatechars:30 }}</div>
+                                    <td class="px-4 sm:px-6 py-4">
+                                        <div class="font-medium text-slate-900 truncate max-w-[150px] sm:max-w-none">{{ orden.ClienteEmpresa.NombreComercial }}</div>
+                                        <div class="text-xs text-slate-400 mt-0.5 truncate max-w-[150px] sm:max-w-none">{{ orden.Servicio|default:"" }}</div>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-2">
                                             <i class="far fa-calendar text-slate-400"></i>
                                             {{ orden.Programada|date:"d/m/Y" }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
                                             <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-1.5"></span>
                                             {{ orden.Estado }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <a href="{% url 'registro_temp' orden.pk %}" class="inline-flex items-center px-3 py-1.5 bg-accent text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md">
-                                            <i class="fas fa-tools mr-1.5"></i> Generar Reporte
+                                    <td class="px-4 sm:px-6 py-4 text-center whitespace-nowrap">
+                                        <a href="{% url 'registro_temp' orden.pk %}" class="inline-flex items-center px-3 py-2 bg-accent text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md active:bg-blue-800">
+                                            <i class="fas fa-tools mr-1.5"></i> <span class="">Generar</span>
                                         </a>
                                     </td>
                                 </tr>
@@ -184,11 +186,11 @@
                                 <tr>
                                     <td colspan="5" class="px-6 py-12 text-center text-slate-500">
                                         <div class="flex flex-col items-center justify-center">
-                                            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3 text-slate-300">
-                                                <i class="fas fa-check-circle text-3xl"></i>
+                                            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3 text-slate-300">
+                                                <i class="fas fa-check-circle text-2xl sm:text-3xl"></i>
                                             </div>
-                                            <p class="font-medium">¡Excelente!</p>
-                                            <p class="text-sm">No hay reportes pendientes por generar en este momento.</p>
+                                            <p class="font-medium">¡Al día!</p>
+                                            <p class="text-xs sm:text-sm">No hay reportes pendientes.</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -197,10 +199,36 @@
                         </table>
                     </div>
                 </div>
+                
+                <div class="h-8 lg:hidden"></div>
 
             </div>
         </main>
     </div>
+
+    <script>
+        const btnMenu = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const btnCloseSidebar = document.getElementById('close-sidebar-btn');
+
+        function toggleMenu() {
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        btnMenu.addEventListener('click', toggleMenu);
+        btnCloseSidebar.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+    </script>
 
 </body>
 </html>
