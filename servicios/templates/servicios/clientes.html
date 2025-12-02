@@ -58,7 +58,7 @@
     <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-20 shrink-0">
         <div class="flex items-center gap-4">
             <div class="flex items-center gap-2">
-                <img src="{% static 'img/logo.jpeg' %}" alt="Logo" class="h-8 w-auto object-contain">
+                <img src="{% static 'img/logo.JPEG' %}" alt="Logo" class="h-8 w-auto object-contain">
                 <span class="font-bold text-xl tracking-tight text-slate-900">ITECH</span>
             </div>
             <div class="hidden md:flex h-6 w-px bg-slate-300 mx-2"></div>
@@ -282,7 +282,7 @@
 
                         <div>
                             <label for="correo" class="block text-xs font-bold text-slate-600 uppercase mb-1">Correo Electrónico</label>
-                            <input type="email" id="correo" name="Correo" required value="{{ cliente_a_editar.Correo|default:'' }}"
+                            <input type="email" id="correo" name="Correo" value="{{ cliente_a_editar.Correo|default:'' }}"
                                     class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
                         </div>
 
@@ -311,7 +311,7 @@
                         </div>
                         <div>
                             <label for="cp" class="block text-xs font-bold text-slate-600 uppercase mb-1">Código Postal</label>
-                            <input type="text" id="cp" name="CodigoPostal" required value="{{ cliente_a_editar.CodigoPostal|default:'' }}"
+                            <input type="text" id="cp" name="CodigoPostal" value="{{ cliente_a_editar.CodigoPostal|default:'' }}"
                                     class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
                         </div>
 
