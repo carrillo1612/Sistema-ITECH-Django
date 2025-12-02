@@ -8,16 +8,14 @@
         /* --- CONFIGURACIÓN DE PÁGINA --- */
         @page {
             size: letter;
-            /* Margen superior: 1.5cm */
+            /* Margen superior/lateral: 1.5cm; Inferior: 2cm */
             margin: 1.5cm 1.5cm 2cm 1.5cm; 
 
-            /* El encabezado ya NO está en el marco, se imprime estáticamente */
-            
             @frame footer_frame {
                 -pdf-frame-content: footer_content;
                 bottom: 0cm;
-                left: 1.5cm;
-                width: 18.5cm;
+                left: 1.5cm; /* CLAVE: Vuelve al margen izquierdo de 1.5cm */
+                width: 18.5cm; /* Ancho de impresión (21.5cm - 3cm de margen total) */
                 height: 1.5cm;
             }
         }
@@ -150,14 +148,14 @@
     </div>
 
     <div id="footer_content">
-        <table style="width: 100%;">
+        <table style="width: 100%; margin-top: 5px; border-top: 1px solid #48788b;">
             <tr>
-                <td align="left" style="width: 80%; color: #000; font-weight: bold; font-size: 8pt; border: none;">
+                <td align="center" style="width: 60%; color: #333; font-weight: bold; font-size: 8pt; border: none; padding: 5px 0 0 0;">
                     CALLE CLAVELES #149, COL. LAS ROSAS, COMALCALCO, TABASCO.<br>
-                    Tel. | ventas@i-techmx.com
+                    Tel. 9331129250 | ventas@i-techmx.com
                 </td>
-                <td align="right" style="width: 20%; color: #000; font-weight: bold; font-size: 9pt; border: none; padding-right: 10px;">
-                    Página: <pdf:pagenumber /> / <pdf:pagecount />
+                <td align="right" style="width: 40%; color: #333333; font-weight: bold; font-size: 9pt; border: none; padding: 5px 0 0 0;">
+                    Folio: <span style="color: #a94442;">{{ orden.OrdenID }}</span> | Página: <pdf:pagenumber /> / <pdf:pagecount />
                 </td>
             </tr>
         </table>
