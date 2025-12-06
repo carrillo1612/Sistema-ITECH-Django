@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <title>Acceso al Sistema | ITECH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* Variables Globales (Tomadas de tus archivos) */
@@ -141,6 +142,51 @@
             text-decoration: underline;
             color: #0056b3;
         }
+
+        /* --- 2. Media Query para Dispositivos Móviles (Menos de 600px) --- */
+        @media (max-width: 600px) {
+            
+            /* Permite el scroll y desactiva el centrado estricto */
+            body {
+                display: block; 
+                min-height: auto; 
+                padding: 20px 0; /* Agrega espacio en la parte superior/inferior */
+            }
+            
+            /* Contenedor más grande y ajustado al ancho móvil */
+            .login-container {
+                max-width: 90%; 
+                margin: 20px auto; 
+                padding: 20px; 
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); 
+            }
+
+            /* Ajusta el tamaño de la fuente para que no sea tan grande */
+            .login-header h1 {
+                font-size: 1.4em; 
+            }
+        
+            .login-header p {
+                font-size: 0.8em;
+            }
+
+            /* Asegura que los campos de entrada sean fáciles de tocar */
+            .input-icon-group {
+                padding: 10px;
+            }
+            
+            /* Asegura que el botón sea un buen objetivo táctil */
+            .btn-login {
+                padding: 14px;
+                font-size: 1em;
+            }
+
+            /* Separa los enlaces de ayuda en líneas individuales si existen */
+            .help-links a {
+                display: block; 
+                margin: 5px 0;
+            }
+        }
     </style>
 </head>
 
@@ -177,9 +223,7 @@
             </button>
             
         </form> 
-
-
- 
-    </div>
+        
+        </div>
 </body>
 </html>
