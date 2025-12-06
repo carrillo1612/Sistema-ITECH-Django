@@ -51,9 +51,11 @@
         }
         @media (min-width: 768px) { #calendar { padding: 1.5rem; } }
         
-        .fc .fc-toolbar-title { font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+        /* Ajuste de Título para Móviles */
+        .fc .fc-toolbar-title { font-size: 1rem; font-weight: 700; color: #1e293b; }
         @media (min-width: 768px) { .fc .fc-toolbar-title { font-size: 1.5rem; } }
 
+        /* Estilo general de botones */
         .fc-toolbar-chunk button {
             background-color: #2563EB !important; border-color: #2563EB !important; color: #fff !important;
             border-radius: 0.375rem !important; padding: 0.4rem 0.6rem !important; font-size: 0.8rem !important;
@@ -62,6 +64,30 @@
         .fc-toolbar-chunk button:hover { background-color: #1d4ed8 !important; border-color: #1d4ed8 !important; }
         .fc-toolbar-chunk button.fc-button-active { background-color: #1e40af !important; border-color: #1e40af !important; }
         .fc-today-button { background-color: #64748b !important; border-color: #64748b !important; }
+
+        /* NUEVO: Adaptación de la Toolbar del FullCalendar para móviles */
+        @media (max-width: 640px) {
+            .fc .fc-toolbar {
+                flex-direction: column; /* Apila los chunks verticalmente */
+                align-items: center;
+            }
+            .fc .fc-toolbar-chunk:nth-child(2) { /* Título */
+                order: -1; /* Mueve el título arriba */
+                margin-bottom: 0.5rem;
+            }
+            .fc .fc-toolbar-chunk {
+                margin-bottom: 0.5rem;
+            }
+            .fc .fc-button-group {
+                display: flex; /* Asegura que los grupos de botones sigan en línea */
+                flex-wrap: nowrap;
+            }
+            .fc-toolbar-chunk button {
+                padding: 0.3rem 0.5rem !important; /* Botones más compactos */
+                font-size: 0.75rem !important;
+            }
+        }
+        /* Fin de Adaptación de Toolbar */
 
         /* Tooltip */
         .event-tooltip {
@@ -84,8 +110,12 @@
 
 <body class="bg-slate-100 text-slate-800 h-[100dvh] flex flex-col overflow-hidden font-sans">
 
-      <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-20 shrink-0">
+    <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm z-20 shrink-0">
         <div class="flex items-center gap-4">
+            <button id="mobile-menu-btn" onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-500 hover:text-accent">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            
             <div class="flex items-center gap-2">
                 <img src="{% static 'img/logo.jpeg' %}" alt="Logo" class="h-8 w-auto object-contain">
                 <span class="font-bold text-xl tracking-tight text-slate-900">ITECH</span>
@@ -111,11 +141,11 @@
         
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
 
-        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex-col shadow-xl z-40 transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex h-[100dvh] lg:h-auto">
-            <div class="p-6">
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex-col shadow-xl z-40 transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex h-[100dvh] lg:h-auto shrink-0">
+            <div class="p-6 overflow-y-auto flex-1">
                 <div class="flex justify-between items-center mb-6 lg:hidden">
                     <span class="text-white font-bold text-lg">Menú</span>
-                    <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-2">
+                    <button id="close-sidebar-btn" onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-2">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
@@ -146,7 +176,7 @@
                     {% endif %}
                 </nav>
             </div>
-            <div class="mt-auto p-6 border-t border-slate-800">
+            <div class="mt-auto p-6 border-t border-slate-800 shrink-0">
                 <p class="text-xs text-center text-slate-600">&copy; 2024 ITECH System</p>
             </div>
         </aside>
@@ -198,7 +228,7 @@
                             <input type="hidden" id="filter_estado_actividad" value="Todos">
                         </div>
 
-                        <div class="flex gap-2 w-full lg:w-auto justify-end lg:justify-start mt-2 lg:mt-0">
+                        <div class="flex gap-2 w-full lg:w-auto justify-end lg:justify-start mt-2 lg:mt-0 shrink-0">
                             <button id="btn_nueva" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center justify-center gap-2">
                                 <i class="fas fa-plus"></i> Nueva Actividad
                             </button>
@@ -222,47 +252,42 @@
     const REGISTRO_URL_BASE = "{% url 'registro_temp' 0 %}";
     const userRole = "{{ user.Rol }}";
 
+    // Función global para manejar el menú (necesario para el onclick en HTML)
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const isClosed = sidebar.classList.contains('-translate-x-full');
+
+        if (isClosed) {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+        } else {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+        }
+    }
+
+
     document.addEventListener('DOMContentLoaded', function () {
 
         const calendarEl = document.getElementById('calendar');
         const btnNueva = document.getElementById('btn_nueva');
         
-        // 1. Menú Móvil
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        const btnMenu = document.getElementById('mobile-menu-btn');
-        const btnCloseSidebar = document.getElementById('close-sidebar-btn');
-
-        function toggleMenu() {
-            const isClosed = sidebar.classList.contains('-translate-x-full');
-            if (isClosed) {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-            } else {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.classList.add('hidden'), 300);
-            }
-        }
-        if(btnMenu) btnMenu.addEventListener('click', toggleMenu);
-        if(btnCloseSidebar) btnCloseSidebar.addEventListener('click', toggleMenu);
-        if(overlay) overlay.addEventListener('click', toggleMenu);
-
-        // 2. Tooltip
+        // 1. Tooltip
         const tooltip = document.createElement('div');
         tooltip.className = 'event-tooltip'; 
         document.body.appendChild(tooltip);
 
-        // 3. REDIRECCIÓN DEL BOTÓN "NUEVA ACTIVIDAD" (MODIFICADO)
-        // Ahora redirige directamente a la lista de reportes pendientes
+        // 2. REDIRECCIÓN DEL BOTÓN "NUEVA ACTIVIDAD" 
         if(btnNueva){
             btnNueva.addEventListener('click', () => {
                 window.location.href = "{% url 'lista_reportes_pendientes' %}";
             });
         }
 
-        // 4. FullCalendar
+        // 3. FullCalendar
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             locale: 'es',
@@ -277,15 +302,16 @@
             height: 'auto', 
             contentHeight: 'auto',
 
+            // Lógica de cambio de vista en resize (mejorada)
             windowResize: function(view) {
                 const screenWidth = window.innerWidth;
                 if (screenWidth < 640) {
                     if(calendar.view.type !== 'listWeek') {
-                        calendar.changeView('listWeek');
+                        calendar.changeView('listWeek'); // Vista de lista para móviles
                     }
                 } else {
                     if(calendar.view.type === 'listWeek') {
-                        calendar.changeView('dayGridMonth');
+                        calendar.changeView('dayGridMonth'); // Vuelve a mes para escritorio/tablet
                     }
                 }
             },
@@ -306,19 +332,22 @@
             },
 
             eventDidMount: function (info) {
+                // El tooltip solo se activa para pantallas de escritorio (lg: 1024px)
                 if (window.matchMedia("(min-width: 1024px)").matches) {
                     info.el.addEventListener('mouseenter', function () {
                         const props = info.event.extendedProps;
                         tooltip.innerHTML = `
-                            <span class="tooltip-title">${info.event.title}</span>
+                            <span style="font-weight: bold; display: block; margin-bottom: 5px; color: #e2e8f0;">
+                                <i class="fas fa-file-alt"></i> ${info.event.title}
+                            </span>
                             <span style="font-weight: bold; display: block; margin-bottom: 5px; color: #e2e8f0;">
                                 <i class="fas fa-user-circle"></i> ${props.cliente_nombre || 'N/A'}
                             </span>
                             <hr style="border-top: 1px solid #475569; margin: 8px 0;">
-                            <span class="tooltip-label"><i class="fas fa-phone-alt"></i> ${props.telefono || 'N/A'}</span>
-                            <span class="tooltip-label"><i class="fas fa-map-marker-alt"></i> ${props.ubicacion || 'N/A'}</span>
-                            <span class="tooltip-label"><i class="fas fa-hard-hat"></i> ${props.asignado || 'N/A'}</span>
-                            <span class="tooltip-label" style="font-weight: bold; color: #4ade80; margin-top: 10px; text-transform: uppercase;">
+                            <span class="tooltip-label block mb-1"><i class="fas fa-phone-alt"></i> ${props.telefono || 'N/A'}</span>
+                            <span class="tooltip-label block mb-1"><i class="fas fa-map-marker-alt"></i> ${props.ubicacion || 'N/A'}</span>
+                            <span class="tooltip-label block mb-1"><i class="fas fa-hard-hat"></i> ${props.asignado || 'N/A'}</span>
+                            <span class="tooltip-label block" style="font-weight: bold; color: #4ade80; margin-top: 10px; text-transform: uppercase;">
                                 ${props.estado_orden || 'N/A'}
                             </span>
                         `;
@@ -361,6 +390,11 @@
             editable: false
         });
 
+        // Inicializa el cambio de vista si la pantalla es pequeña al cargar
+        if (window.innerWidth < 640) {
+            calendar.changeView('listWeek');
+        }
+        
         calendar.render();
 
         ['filter_cliente', 'filter_personal', 'filter_estado_orden'].forEach(id => {
