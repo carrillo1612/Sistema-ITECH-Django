@@ -246,10 +246,11 @@
         </main>
     </div>
 
-    <script>
+<script>
     const PDF_URL_BASE = "{% url 'ver_reporte' 0 %}";
     const EDIT_URL_BASE = "{% url 'editar_orden' 0 %}";
     const REGISTRO_URL_BASE = "{% url 'registro_temp' 0 %}";
+    // La variable userRole es crucial
     const userRole = "{{ user.Rol }}";
 
     // Función global para manejar el menú (necesario para el onclick en HTML)
@@ -275,19 +276,27 @@
         const calendarEl = document.getElementById('calendar');
         const btnNueva = document.getElementById('btn_nueva');
         
-        // 1. Tooltip
+        // 1. Tooltip (se mantiene la lógica anterior)
         const tooltip = document.createElement('div');
         tooltip.className = 'event-tooltip'; 
         document.body.appendChild(tooltip);
 
-        // 2. REDIRECCIÓN DEL BOTÓN "NUEVA ACTIVIDAD" 
+        // 2. REDIRECCIÓN DEL BOTÓN "NUEVA ACTIVIDAD" (LÓGICA CORREGIDA)
         if(btnNueva){
             btnNueva.addEventListener('click', () => {
-                window.location.href = "{% url 'lista_reportes_pendientes' %}";
+                if (userRole === 'Administrador') {
+                    // Redirige al Administrador a la lista de órdenes para registro/creación
+                    window.location.href = "{% url 'lista_ordenes' %}";
+                } else if (userRole === 'Técnico') {
+                    // Redirige al Técnico a generar reporte
+                    window.location.href = "{% url 'lista_reportes_pendientes' %}";
+                } else {
+                    alert('Acceso no autorizado para esta acción.');
+                }
             });
         }
 
-        // 3. FullCalendar
+        // 3. FullCalendar (el resto de la inicialización se mantiene)
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             locale: 'es',
@@ -302,16 +311,15 @@
             height: 'auto', 
             contentHeight: 'auto',
 
-            // Lógica de cambio de vista en resize (mejorada)
             windowResize: function(view) {
                 const screenWidth = window.innerWidth;
                 if (screenWidth < 640) {
                     if(calendar.view.type !== 'listWeek') {
-                        calendar.changeView('listWeek'); // Vista de lista para móviles
+                        calendar.changeView('listWeek');
                     }
                 } else {
                     if(calendar.view.type === 'listWeek') {
-                        calendar.changeView('dayGridMonth'); // Vuelve a mes para escritorio/tablet
+                        calendar.changeView('dayGridMonth');
                     }
                 }
             },
@@ -332,7 +340,6 @@
             },
 
             eventDidMount: function (info) {
-                // El tooltip solo se activa para pantallas de escritorio (lg: 1024px)
                 if (window.matchMedia("(min-width: 1024px)").matches) {
                     info.el.addEventListener('mouseenter', function () {
                         const props = info.event.extendedProps;
@@ -390,7 +397,6 @@
             editable: false
         });
 
-        // Inicializa el cambio de vista si la pantalla es pequeña al cargar
         if (window.innerWidth < 640) {
             calendar.changeView('listWeek');
         }
