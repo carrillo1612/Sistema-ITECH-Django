@@ -250,16 +250,6 @@
             transition: transform 0.3s ease-out;
             z-index: 50;
         }
-        /* Clase añadida para forzar la visualización en móvil */
-        .sidebar-show-mobile {
-            transform: translateX(0) !important;
-        }
-        /* CORRECCIÓN: La clase hidden en el ASIDE original */
-        @media (max-width: 768px) {
-            #sidebar.md\:flex { /* Si tienes la clase md:flex */
-                display: none;
-            }
-        }
     </style>
 </head>
 
@@ -296,7 +286,7 @@
         
         <div id="sidebar-overlay" class="sidebar-overlay hidden md:hidden" onclick="toggleSidebar()"></div>
 
-        <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10 sidebar-mobile md:static">
+        <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10 sidebar-mobile md:static md:translate-x-0">
             <div class="p-6 flex-1 overflow-y-auto">
                 
                 <div class="flex justify-between items-center mb-6 md:hidden">
@@ -704,13 +694,13 @@
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
         
-        // Determina si estamos en modo móvil (es decir, si la clase 'hidden' está activa)
-        const isClosed = window.innerWidth < 768 && sidebar.style.transform === 'translateX(-100%)';
+        // Verifica si la sidebar está en su posición oculta (fuera de pantalla)
+        const isClosed = sidebar.style.transform === 'translateX(-100%)' || !sidebar.classList.contains('md:flex');
 
         if (isClosed) {
             // Abrir
             sidebar.style.transform = 'translateX(0)';
-            sidebar.classList.add('sidebar-show-mobile'); // Muestra el elemento en móvil
+            sidebar.classList.add('md:hidden'); // Para asegurar que no compita con el layout de escritorio
             overlay.classList.remove('hidden');
             setTimeout(() => overlay.classList.remove('opacity-0'), 10);
         } else {
@@ -719,7 +709,7 @@
             overlay.classList.add('opacity-0');
             setTimeout(() => {
                 overlay.classList.add('hidden');
-                sidebar.classList.remove('sidebar-show-mobile');
+                sidebar.classList.remove('md:hidden');
             }, 300);
         }
     }
@@ -728,12 +718,10 @@
     document.addEventListener('DOMContentLoaded', function () {
         console.log("DOM Cargado - Gestión de Órdenes (Versión Final adaptada)");
         
-        // Inicializa el estado del sidebar para móvil
+        // Inicializa el estado del sidebar para móvil si es necesario
         const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
         if (sidebar && window.innerWidth < 768) {
-            sidebar.style.transform = 'translateX(-100%)';
-            sidebar.classList.remove('hidden'); // Asegura que esté en el DOM para la transición
+             sidebar.style.transform = 'translateX(-100%)';
         }
 
 
@@ -1013,19 +1001,6 @@
                 }
             });
         }
-        
-        // CORRECCIÓN FINAL para asegurar la visibilidad del sidebar en desktop si se cierra en móvil
-        window.addEventListener('resize', function() {
-            if (window.innerWidth >= 768) {
-                sidebar.style.transform = 'translateX(0)';
-                sidebar.classList.remove('md:hidden');
-                overlay.classList.add('hidden');
-                overlay.classList.add('opacity-0');
-            } else if (window.innerWidth < 768 && !sidebar.classList.contains('sidebar-show-mobile')) {
-                // Solo si es móvil y no está abierto
-                 sidebar.style.transform = 'translateX(-100%)';
-            }
-        });
 
     }); 
 </script>
