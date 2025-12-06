@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Órdenes de Servicio | ITECH</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -48,15 +48,16 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .smooth-scroll { -webkit-overflow-scrolling: touch; } /* Scroll suave en iOS */
 
-        /* --- TUS ESTILOS DE FILTROS Y TABLA (INTACTOS) --- */
+        /* --- TUS ESTILOS DE FILTROS Y TABLA (ADAPTACIÓN MÓVIL) --- */
         .filter-toolbar {
             background-color: #fff;
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             margin-bottom: 20px;
-            border: 1px solid #e2e8f0; /* Ajustado a Tailwind slate-200 */
+            border: 1px solid #e2e8f0;
         }
 
         .filter-row { display: flex; gap: 20px; margin-bottom: 15px; }
@@ -66,6 +67,51 @@
             flex: 1; padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; min-width: 0;
         }
         .filter-group input[type="date"] { width: 130px; }
+
+        /* ADAPTACIÓN MÓVIL PARA FILTROS */
+        @media (max-width: 768px) {
+            .filter-row {
+                flex-direction: column; /* Apila los grupos de filtros verticalmente */
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+            .filter-group {
+                flex-direction: column; 
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .filter-group label { 
+                font-size: 0.8em; 
+                font-weight: 600; 
+                color: #2563EB; 
+            }
+            .filter-group select, .filter-group input[type="date"] {
+                width: 100%;
+                font-size: 1em;
+                padding: 10px;
+            }
+            .action-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .action-toolbar-left, .action-toolbar-right {
+                flex-wrap: wrap;
+                gap: 10px;
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .action-toolbar-right { 
+                margin-top: 10px; 
+                justify-content: space-between;
+            }
+            .action-toolbar .search-box input { width: 100%; }
+            .action-toolbar .search-box { flex: 1; }
+            .action-toolbar #btn_nueva_orden { 
+                flex: 1; /* Hace que el botón ocupe más espacio */
+                padding: 10px 15px; 
+            }
+        }
+        /* Fin Adaptación Filtros */
 
         .action-toolbar {
             display: flex; justify-content: space-between; align-items: center;
@@ -85,37 +131,27 @@
 
         /* Tabla */
         .data-table-container {
-            flex: 1; overflow: visible; background-color: #fff;
+            flex: 1; 
+            overflow-x: auto; /* Permite scroll horizontal en la tabla en móviles */
+            background-color: #fff;
             border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px;
+            -webkit-overflow-scrolling: touch;
         }
-        .data-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .data-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            table-layout: auto; /* Auto para permitir ajuste de columnas */
+            min-width: 1000px; /* Ancho mínimo para forzar el scroll horizontal en móviles */
+        }
         .data-table th, .data-table td {
             padding: 12px 10px; text-align: left; border-bottom: 1px solid #eee;
             font-size: 0.85em; overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap; /* Evita que el texto de la tabla se rompa */
         }
-        .data-table th { background-color: #f8fafc; color: #64748b; font-weight: 600; } /* Ajustado a colores slate */
+        .data-table th { background-color: #f8fafc; color: #64748b; font-weight: 600; }
         .data-table tr:hover { background-color: #f0f8ff; }
 
-        /* Acciones de fila */
-        .action-cell { position: relative; text-align: center; }
-        .row-action-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 1.1em; padding: 5px; }
-        .row-action-btn:hover { color: var(--primary-color); }
-        
-        /* Dropdown Menu */
-        .dropdown-menu {
-            position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
-            z-index: 50; background-color: #fff; min-width: 150px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border-radius: 4px; padding: 5px 0; display: none;
-        }
-        .dropdown-menu.show { display: block; }
-        .dropdown-item {
-            display: flex; align-items: center; padding: 8px 15px; text-decoration: none;
-            color: var(--text-color); font-size: 0.9em; cursor: pointer; transition: background-color 0.1s;
-        }
-        .dropdown-item:hover { background-color: var(--light-bg); color: var(--primary-color); }
-        .dropdown-item.delete:hover { color: var(--danger-color); background-color: #fcebeb; }
-
-        /* Status Tags */
+        /* Status Tags - se mantienen */
         .folio-cell { font-weight: bold; color: var(--primary-color); }
         .status-tag { display: inline-block; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8em; text-transform: uppercase; }
         .status-terminada { background-color: #e6f7ff; color: #1890ff; }
@@ -124,11 +160,8 @@
         .pdf-download-btn { background: none; border: none; color: var(--primary-color); cursor: pointer; font-size: 1.1em; opacity: 0.7; transition: opacity 0.2s; }
         .pdf-download-btn:hover { opacity: 1; }
 
-        /* --- ESTILOS DEL MODAL (INTACTOS) --- */
-        .modal {
-            display: none; position: fixed; z-index: 900; left: 0; top: 0;
-            width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.5);
-        }
+        /* --- ESTILOS DEL MODAL (ADAPTACIÓN MÓVIL) --- */
+        .modal { display: none; position: fixed; z-index: 900; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.5); }
         .modal-content {
             background-color: #f8f9fa; margin: 2% auto; padding: 1.5rem;
             width: 90%; max-width: 1400px; border-radius: 8px; position: relative;
@@ -136,36 +169,73 @@
         }
         .modal-body { display: flex; gap: 2rem; }
         .modal .form-section { flex: 3; }
-        .modal .card {
-            background-color: #fff; padding: 1.5rem; border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); margin-bottom: 1.5rem;
-        }
-        .modal .card h2 { margin-top: 0; font-size: 1.25rem; margin-bottom: 1rem;}
-        .modal .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-        .modal .form-group { display: flex; flex-direction: column; }
-        .modal .form-group label { margin-bottom: 0.5rem; font-size: 0.9rem; color: #555; font-weight: 600; }
-        .modal .form-group input, .modal .form-group select, .modal .form-group textarea {
-            width: 100%; padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 4px; font-size: 1rem; box-sizing: border-box;
-        }
-        .modal .full-width { grid-column: span 2; }
-        .modal .add-item-section { display: grid; grid-template-columns: 80px 1fr 1fr auto; gap: 1rem; align-items: flex-end; }
-        .modal .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: 600; text-align: center; }
-        .modal .btn-primary { background-color: var(--primary-color); color: #fff; }
         .modal .actions-section { flex: 1; }
-        .modal .actions-card .info-header { text-align: center; margin-bottom: 2rem; }
-        .modal .actions-card .fa-calendar-day { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 0.5rem; }
-        .modal .actions-card .date { font-size: 1.2rem; font-weight: 600; }
-        .modal .actions-card .info-tags { text-align: center; margin-bottom: 2rem; color: var(--secondary-color); font-size: 0.8rem; font-weight: 600; }
-        .modal .actions-card .action-buttons { display: flex; flex-direction: column; gap: 0.75rem; }
-        .modal .btn-success { background-color: #1abc9c; color: #fff; }
-        .modal .btn-outline { background-color: transparent; color: var(--secondary-color); border: 1px solid #dee2e6; }
+        .modal .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        .modal .add-item-section { display: grid; grid-template-columns: 80px 1fr 1fr auto; gap: 1rem; align-items: flex-end; }
+        
+        /* Adaptación a Móviles para el Modal */
+        @media (max-width: 1024px) {
+            .modal-content {
+                margin: 0; 
+                width: 100%; 
+                min-height: 100%; 
+                border-radius: 0;
+            }
+            .modal-body {
+                flex-direction: column; /* Apila Formulario y Acciones */
+                gap: 1rem;
+            }
+            .modal .form-grid {
+                grid-template-columns: 1fr; /* Una sola columna para inputs */
+                gap: 1rem;
+            }
+            .modal .full-width { grid-column: span 1; }
+            .modal .add-item-section {
+                grid-template-columns: 80px 1fr auto; /* Ocultamos 'Información adicional' para móvil */
+                gap: 0.75rem;
+            }
+            /* Ocultar input de info adicional en móviles en la sección de agregar */
+            .modal .add-item-section .form-group:nth-child(3) { 
+                display: none; 
+            }
+        }
+        /* Fin Adaptación Modal */
+
+        /* Estilos del Sidebar y Contenido (Flexbox) */
+        .sidebar-desktop { 
+            width: 64px; 
+            overflow-y: auto; 
+            transition: width 0.3s;
+        }
+        .sidebar-mobile-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sidebar-mobile {
+            position: fixed;
+            inset-y: 0;
+            left: 0;
+            width: 256px;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-out;
+            z-index: 50;
+        }
+
     </style>
 </head>
 
-<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden font-sans">
+<body class="bg-slate-100 text-slate-800 h-[100dvh] flex flex-col overflow-hidden font-sans">
 
-    <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 shadow-sm z-20 shrink-0">
+    <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm z-20 shrink-0">
         <div class="flex items-center gap-4">
+            <button id="mobile-menu-btn" onclick="toggleSidebar()" class="md:hidden p-2 text-slate-500 hover:text-accent">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+
             <div class="flex items-center gap-2">
                 <img src="{% static 'img/logo.jpeg' %}" alt="Logo" class="h-8 w-auto object-contain">
                 <span class="font-bold text-xl tracking-tight text-slate-900">ITECH</span>
@@ -187,133 +257,138 @@
         </div>
     </nav>
 
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1 overflow-hidden relative">
         
-        <aside class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10">
-            <div class="p-6">
-                <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4">Menú Principal</p>
+        <div id="sidebar-overlay" class="sidebar-mobile-overlay hidden md:hidden" onclick="toggleSidebar()"></div>
+
+        <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10 sidebar-mobile md:static md:translate-x-0">
+            <div class="p-6 flex-1 overflow-y-auto">
+                <div class="flex justify-between items-center mb-6 md:hidden">
+                    <span class="text-white font-bold text-lg">Menú</span>
+                    <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-2">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4 hidden md:block">Menú Principal</p>
                 <nav class="space-y-1">
-    
-                  <nav class="space-y-1">
-    
-    <a href="{% url 'vista_calendario' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
-        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
-    </a>
+    
+                    <a href="{% url 'vista_calendario' %}" 
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-calendar-alt w-5 text-center group-hover:text-accent transition-colors"></i> Calendario
+                    </a>
 
-     <a href="{% url 'lista_ordenes' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
-    </a>
-    
-    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
-    <a href="{% url 'lista_reportes_pendientes' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
-    </a>
-    {% endif %}
+                    <a href="{% url 'lista_ordenes' %}" 
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
+                        <i class="fas fa-file-invoice w-5 text-center text-accent transition-colors"></i> Órdenes
+                    </a>
+                    
+                    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
+                    <a href="{% url 'lista_reportes_pendientes' %}" 
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
+                    </a>
+                    {% endif %}
 
-    {% if request.user.Rol == 'Administrador' %}
-    
-    <a href="{% url 'lista_clientes' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
-    </a>
+                    {% if request.user.Rol == 'Administrador' %}
+                    <a href="{% url 'lista_clientes' %}" 
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
+                    </a>
 
+                    <a href="{% url 'gestion_usuarios' %}" 
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
+                    </a>
+                    {% endif %}
 
-    <a href="{% url 'gestion_usuarios' %}" 
-       class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
-    </a>
-    {% endif %}
-
-</nav>
+                </nav>
             </div>
-            <div class="mt-auto p-6 border-t border-slate-800">
+            <div class="mt-auto p-6 border-t border-slate-800 shrink-0">
                 <p class="text-xs text-center text-slate-600">&copy; 2024 ITECH System</p>
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50">
+        <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50 w-full h-full">
             
-            <div class="px-8 py-6 pb-2 shrink-0">
+            <div class="px-4 sm:px-8 py-6 pb-2 shrink-0">
                 <div class="flex items-center gap-3 mb-1">
                     <div class="p-2 bg-blue-100 text-accent rounded-lg">
                         <i class="fas fa-file-invoice text-xl"></i>
                     </div>
-                    <h1 class="text-2xl font-bold text-slate-800">Gestión de Órdenes</h1>
+                    <h1 class="text-xl sm:text-2xl font-bold text-slate-800">Gestión de Órdenes</h1>
                 </div>
-                <p class="text-slate-500 text-sm ml-12">Administra y filtra todas las órdenes de servicio.</p>
+                <p class="text-slate-500 text-xs sm:text-sm ml-10 sm:ml-12">Administra y filtra todas las órdenes de servicio.</p>
             </div>
 
-            <div class="flex-1 p-6 sm:px-8 pt-4 overflow-y-auto custom-scrollbar">
+            <div class="flex-1 p-4 sm:p-6 sm:px-8 pt-4 overflow-y-auto smooth-scroll custom-scrollbar">
                 
                <div class="filter-toolbar">
                 <a href="{% url 'lista_ordenes' %}" style="font-size: 0.8em; color: var(--primary-color); text-decoration: underline; cursor: pointer;">
-    <i class="fas fa-sync"></i> Mostrar Todo
-</a>
-    <form method="GET" id="filterForm">
-        
-        <div class="filter-row">
-            <div class="filter-group">
-                <label for="date_start">Desde (programada)</label>
-                <input type="date" name="date_start" id="date_start" 
-                       value="{{ request.GET.date_start }}" 
-                       onchange="this.form.submit()">
-            </div>
-            <div class="filter-group">
-                <label for="date_end">Hasta (programada)</label>
-                <input type="date" name="date_end" id="date_end" 
-                       value="{{ request.GET.date_end }}" 
-                       onchange="this.form.submit()">
-            </div>
-            
-            <div class="filter-group">
-                <select name="cliente" id="filter_client" onchange="this.form.submit()">
-                    <option value="Todos">Cliente - Todos</option>
-                    {% for c in clientes_filtro %}
-                        <option value="{{ c.ClienteID }}" {% if request.GET.cliente == c.ClienteID|stringformat:"s" %}selected{% endif %}>
-                            {{ c.NombreComercial }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-        </div>
+                    <i class="fas fa-sync"></i> Mostrar Todo
+                </a>
+                <form method="GET" id="filterForm">
+                    
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="date_start">Desde (programada)</label>
+                            <input type="date" name="date_start" id="date_start" 
+                                    value="{{ request.GET.date_start }}" 
+                                    onchange="this.form.submit()">
+                        </div>
+                        <div class="filter-group">
+                            <label for="date_end">Hasta (programada)</label>
+                            <input type="date" name="date_end" id="date_end" 
+                                    value="{{ request.GET.date_end }}" 
+                                    onchange="this.form.submit()">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter_client">Cliente</label>
+                            <select name="cliente" id="filter_client" onchange="this.form.submit()">
+                                <option value="Todos">Cliente - Todos</option>
+                                {% for c in clientes_filtro %}
+                                    <option value="{{ c.ClienteID }}" {% if request.GET.cliente == c.ClienteID|stringformat:"s" %}selected{% endif %}>
+                                        {{ c.NombreComercial }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
 
-        <div class="filter-row" style="margin-bottom: 0;">
-            <div class="filter-group">
-                <select name="servicio" onchange="this.form.submit()">
-                    <option value="Todos">Servicio - Todos</option>
-                    <option value="Mantenimiento" {% if request.GET.servicio == 'Mantenimiento' %}selected{% endif %}>Mantenimiento</option>
-                    <option value="Revisión" {% if request.GET.servicio == 'Revisión' %}selected{% endif %}>Revisión</option>
-                    <option value="Reparación" {% if request.GET.servicio == 'Reparación' %}selected{% endif %}>Reparación</option>
-                    <option value="Instalación" {% if request.GET.servicio == 'Instalación' %}selected{% endif %}>Instalación</option>
-                </select>
+                    <div class="filter-row" style="margin-bottom: 0;">
+                        <div class="filter-group">
+                            <label for="filter_service">Servicio</label>
+                            <select name="servicio" id="filter_service" onchange="this.form.submit()">
+                                <option value="Todos">Servicio - Todos</option>
+                                <option value="Mantenimiento" {% if request.GET.servicio == 'Mantenimiento' %}selected{% endif %}>Mantenimiento</option>
+                                <option value="Revisión" {% if request.GET.servicio == 'Revisión' %}selected{% endif %}>Revisión</option>
+                                <option value="Reparación" {% if request.GET.servicio == 'Reparación' %}selected{% endif %}>Reparación</option>
+                                <option value="Instalación" {% if request.GET.servicio == 'Instalación' %}selected{% endif %}>Instalación</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filter_status">Estado</label>
+                            <select name="estado" id="filter_status" onchange="this.form.submit()">
+                                <option value="Todos">Estado - Todos</option>
+                                <option value="Pendiente" {% if request.GET.estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                                <option value="Terminada" {% if request.GET.estado == 'Terminada' %}selected{% endif %}>Terminada</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filter_personal">Personal</label>
+                            <select name="personal" id="filter_personal" onchange="this.form.submit()">
+                                <option value="Todos">Personal - Todos</option>
+                                {% for t in tecnicos_filtro %}
+                                    <option value="{{ t.UsuarioID }}" {% if request.GET.personal == t.UsuarioID|stringformat:"s" %}selected{% endif %}>
+                                        {{ t.Nombre }} {{ t.Apellido }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </form>
             </div>
-            
-            <div class="filter-group">
-                <select name="estado" onchange="this.form.submit()">
-                    <option value="Todos">Estado - Todos</option>
-                    <option value="Pendiente" {% if request.GET.estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
-                    <option value="Terminada" {% if request.GET.estado == 'Terminada' %}selected{% endif %}>Terminada</option>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <select name="personal" onchange="this.form.submit()">
-                    <option value="Todos">Personal - Todos</option>
-                    {% for t in tecnicos_filtro %}
-                        <option value="{{ t.UsuarioID }}" {% if request.GET.personal == t.UsuarioID|stringformat:"s" %}selected{% endif %}>
-                            {{ t.Nombre }} {{ t.Apellido }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-
-    </form>
-</div>
 
                 <div class="action-toolbar">
                     <div class="action-toolbar-left">
@@ -325,21 +400,21 @@
                         </select>
                         <label>registros</label>
                     </div>
-<div class="action-toolbar-right">
-{% if request.user.Rol == 'Administrador' %}
- <button id="btn_nueva_orden"><i class="fas fa-plus-circle"></i> Nueva Orden</button>
- <button id="btn_xls"><i class="fas fa-file-excel"></i> XLS</button>
- <button id="btn_print"><i class="fas fa-print"></i></button>
- {% endif %}
- <div class="search-box">
-    <i class="fas fa-search"></i>
-    <form method="GET" action="{% url 'lista_ordenes' %}" style="width: 100%;">
-        <input type="text" name="q" placeholder="Buscar cliente, folio..." 
-               value="{{ request.GET.q }}" 
-               style="border: none; outline: none; width: 100%;"
-               aria-label="Buscar">
-    </form>
-</div>
+                    <div class="action-toolbar-right">
+                        {% if request.user.Rol == 'Administrador' %}
+                        <button id="btn_nueva_orden" class="sm:w-auto"><i class="fas fa-plus-circle"></i> Nueva Orden</button>
+                        <button id="btn_xls" class="hidden sm:block"><i class="fas fa-file-excel"></i> XLS</button>
+                        <button id="btn_print" class="hidden sm:block"><i class="fas fa-print"></i></button>
+                        {% endif %}
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <form method="GET" action="{% url 'lista_ordenes' %}" style="width: 100%;">
+                                <input type="text" name="q" placeholder="Buscar cliente, folio..." 
+                                    value="{{ request.GET.q }}" 
+                                    style="border: none; outline: none; width: 100%;"
+                                    aria-label="Buscar">
+                            </form>
+                        </div>
                     </div>
                 </div>
 
@@ -362,36 +437,36 @@
                         <tbody>
                         {% for orden in lista_de_ordenes %}
                         <tr>
-<td class="action-cell" style="white-space: nowrap;">
- <div class="flex items-center justify-center gap-3">
+                            <td class="action-cell" style="white-space: nowrap;">
+                                <div class="flex items-center justify-center gap-3">
 
-{% if request.user.Rol == 'Administrador' %}
+                                {% if request.user.Rol == 'Administrador' %}
 
-    <a href="{% url 'editar_orden' orden.OrdenID %}" 
-    class="text-blue-500 hover:text-blue-700 transition-colors" 
-   title="Editar Orden">
-    <i class="fas fa-pen"></i>
-    </a>
+                                    <a href="{% url 'editar_orden' orden.OrdenID %}" 
+                                    class="text-blue-500 hover:text-blue-700 transition-colors" 
+                                   title="Editar Orden">
+                                    <i class="fas fa-pen"></i>
+                                    </a>
 
-  <form action="{% url 'eliminar_orden' orden.OrdenID %}" method="POST" class="inline">
-     {% csrf_token %}
-     <button type="submit" 
-    class="text-slate-300 hover:text-red-500 transition-colors" 
-    title="Eliminar Orden"
-    onclick="return confirm('¿Estás seguro de eliminar la Orden #{{ orden.OrdenID }}?');">
-        <i class="fas fa-trash-alt"></i>
-    </button>
-     </form>
+                                    <form action="{% url 'eliminar_orden' orden.OrdenID %}" method="POST" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" 
+                                    class="text-slate-300 hover:text-red-500 transition-colors" 
+                                    title="Eliminar Orden"
+                                    onclick="return confirm('¿Estás seguro de eliminar la Orden #{{ orden.OrdenID }}?');">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                    </form>
 
- {% endif %}
-</div>
-</td>
+                                {% endif %}
+                                </div>
+                            </td>
                             <td class="folio-cell">{{ orden.OrdenID }}</td>
                             <td>
                                 {{ orden.Programada|date:"d/m/Y" }} 
                                 <span class="servicio-text">{{ orden.Programada|date:"H:i" }}</span>
                             </td>
-                            <td>{{ orden.Inicio|time:"H:i"|default:"--" }}</td> <td>{{ orden.Fin|time:"H:i"|default:"--" }}</td>    
+                            <td>{{ orden.Inicio|time:"H:i"|default:"--" }}</td> <td>{{ orden.Fin|time:"H:i"|default:"--" }}</td>     
                             <td class="cliente-cell">
                                 {{ orden.ClienteEmpresa.NombreComercial|default:"(Sin Cliente)" }} 
                                 <span class="servicio-text">{{ orden.Servicio|default:""|upper }}</span>
@@ -429,6 +504,7 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="h-10 sm:h-2"></div> 
             </div>
         </main>
     </div>
@@ -442,8 +518,8 @@
                     <div class="form-section">
                         <div class="card">
                             <h2 style="text-align: center; font-weight: 800; color: #333; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">
-        DATOS GENERALES
-    </h2>
+                                DATOS GENERALES
+                            </h2>
                             <div class="form-grid">
 
                                 <div class="form-group">
@@ -484,18 +560,18 @@
                                     
                                     <div style="display: flex; gap: 10px; align-items: center;">
                                         <input type="text" 
-       id="{{ form_orden.Ubicacion.id_for_label }}" 
-       name="{{ form_orden.Ubicacion.name }}" 
-       class="form-control"
-       readonly
-       required  style="flex: 1; color: #007bff; text-decoration: underline; cursor: pointer; background-color: #f8f9fa;"
-       value="{{ form_orden.instance.Ubicacion|default:'' }}"
-       style="flex: 1; color: #007bff; text-decoration: underline; cursor: pointer; background-color: #f8f9fa;"
-       placeholder="Selecciona un cliente para cargar la ubicación..."
-       onclick="if(this.value.startsWith('http')) { window.open(this.value, '_blank'); }">
+                                            id="{{ form_orden.Ubicacion.id_for_label }}" 
+                                            name="{{ form_orden.Ubicacion.name }}" 
+                                            class="form-control"
+                                            readonly
+                                            required 
+                                            value="{{ form_orden.instance.Ubicacion|default:'' }}"
+                                            style="flex: 1; color: #007bff; text-decoration: underline; cursor: pointer; background-color: #f8f9fa; padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 4px;"
+                                            placeholder="Selecciona un cliente para cargar la ubicación..."
+                                            onclick="if(this.value.startsWith('http')) { window.open(this.value, '_blank'); }">
 
                                         <a id="btn_ir_maps" href="#" target="_blank" class="btn btn-outline" 
-                                           style="text-decoration: none; white-space: nowrap; height: 38px; display: flex; align-items: center; padding: 0 15px; border: 1px solid #ccc; border-radius: 4px; color: #333;">
+                                            style="text-decoration: none; white-space: nowrap; height: 38px; display: flex; align-items: center; padding: 0 15px; border: 1px solid #ccc; border-radius: 4px; color: #333;">
                                             <i class="fas fa-map-marked-alt" style="margin-right: 8px; color: #007bff;"></i> Ir a Maps
                                         </a>
                                     </div>
@@ -528,14 +604,14 @@
                                 <input type="number" id="detalle_cantidad" value="1"> 
                             </div>
                             <div class="form-group">
-                                <label for="detalle_producto">Productos</label>
+                                <label for="detalle_producto">Productos / Material *</label>
                                 <textarea id="detalle_producto" rows="1"></textarea> 
                             </div>
                             <div class="form-group">
-                                <label for="detalle_info">Información adicional</label>
+                                <label for="detalle_info">Info adicional</label>
                                 <input type="text" id="detalle_info"> 
                             </div>
-                            <button type="button" class="btn btn-primary" id="btn_agregar_producto">Agregar</button> 
+                            <button type="button" class="btn btn-primary" id="btn_agregar_producto" style="height: 38px;"><i class="fas fa-plus"></i></button> 
                         </div>
 
                         <div class="card">
@@ -553,33 +629,33 @@
                                 <i class="fas fa-calendar-day"></i>
                                 <div class="date">{{ "now"|date:"d/m/Y" }}</div> 
                             </div>
-<div class="info-tags">
-    <span>(Servicio Técnico)</span> &bull; 
-    <span style="font-weight: bold; color: var(--primary-color);">
-        {% if orden_a_editar %}
-            EDICIÓN FOLIO #{{ orden_a_editar.OrdenID }}
-        {% else %}
-            NUEVO FOLIO #{{ lista_de_ordenes.count|add:1 }}
-        {% endif %}
-    </span>
-</div>
+                            <div class="info-tags">
+                                <span>(Servicio Técnico)</span> &bull; 
+                                <span style="font-weight: bold; color: var(--primary-color);">
+                                    {% if orden_a_editar %}
+                                        EDICIÓN FOLIO #{{ orden_a_editar.OrdenID }}
+                                    {% else %}
+                                        NUEVO FOLIO #{{ lista_de_ordenes.count|add:1 }}
+                                    {% endif %}
+                                </span>
+                            </div>
                             <input type="hidden" name="Estado" value="Pendiente">
 
                             <div class="action-buttons">
                                 <button type="submit" class="btn btn-primary">
-    {% if orden_a_editar %}
-        <i class="fas fa-sync-alt"></i> Actualizar Orden
-    {% else %}
-        <i class="fas fa-save"></i> Guardar Orden
-    {% endif %}
-</button>
+                                    {% if orden_a_editar %}
+                                        <i class="fas fa-sync-alt"></i> Actualizar Orden
+                                    {% else %}
+                                        <i class="fas fa-save"></i> Guardar Orden
+                                    {% endif %}
+                                </button>
                                 <button type="button" id="btn_limpiar" class="btn btn-success">
-    {% if orden_a_editar %}
-        <i class="fas fa-undo"></i> Deshacer
-    {% else %}
-        <i class="fas fa-eraser"></i> Limpiar
-    {% endif %}
-</button>
+                                    {% if orden_a_editar %}
+                                        <i class="fas fa-undo"></i> Deshacer
+                                    {% else %}
+                                        <i class="fas fa-eraser"></i> Limpiar
+                                    {% endif %}
+                                </button>
                                 <button type="button" class="btn btn-outline" id="btn_salir_modal">Salir</button> 
                             </div>
                         </div>
@@ -588,9 +664,30 @@
             </form> 
         </div> 
     </div> 
+
 <script>
+    // Función global para manejar el menú (necesario para el onclick en HTML)
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const isClosed = sidebar.classList.contains('translate-x-full') || sidebar.style.transform === 'translateX(-100%)';
+
+        if (isClosed) {
+            sidebar.classList.remove('translate-x-full');
+            sidebar.style.transform = 'translateX(0)';
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+        } else {
+            sidebar.classList.add('translate-x-full');
+            sidebar.style.transform = 'translateX(-100%)';
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+        }
+    }
+
+
     document.addEventListener('DOMContentLoaded', function () {
-        console.log("DOM Cargado - Gestión de Órdenes (Versión Final)");
+        console.log("DOM Cargado - Gestión de Órdenes (Versión Final adaptada)");
 
         // =========================================================
         // 0. VARIABLES GLOBALES
@@ -615,7 +712,7 @@
         let productosOriginales = []; 
 
         // =========================================================
-        // 1. FUNCIONES DE AYUDA
+        // 1. FUNCIONES DE AYUDA (Se mantienen)
         // =========================================================
         function crearFilaProducto(cantidad, producto, info) {
             const div = document.createElement('div');
@@ -625,17 +722,18 @@
             div.style.display = 'flex';
             div.style.justifyContent = 'space-between';
             div.style.alignItems = 'center';
+            div.style.flexWrap = 'wrap'; // Agregado para mejor adaptación en filas
 
             div.innerHTML = `
-                <span>
+                <span style="flex-basis: 75%; max-width: 75%;">
                     <strong>${cantidad} x ${producto}</strong> 
-                    ${info ? '<br><small style="color:#6c757d;">'+info+'</small>' : ''}
+                    ${info ? '<br><small style="color:#6c757d;">Info: '+info+'</small>' : ''}
                 </span>
-                <span>
+                <span style="flex-basis: 25%; max-width: 25%; text-align: right;">
                     <input type="hidden" name="detalle_cantidad[]" value="${cantidad}">
                     <input type="hidden" name="detalle_producto[]" value="${producto}">
                     <input type="hidden" name="detalle_info[]" value="${info}">
-                    <button type="button" class="btn-remove-producto" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size: 1.2em;" title="Quitar">&times;</button>
+                    <button type="button" class="btn-remove-producto" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size: 1.2em; padding: 5px;" title="Quitar">&times;</button>
                 </span>
             `;
             div.querySelector('.btn-remove-producto').addEventListener('click', function() {
@@ -697,7 +795,7 @@
         }
 
         // =========================================================
-        // 2. AUTOCOMPLETAR
+        // 2. AUTOCOMPLETAR (se mantiene)
         // =========================================================
         if (clienteSelect) {
             clienteSelect.addEventListener('change', function() {
@@ -708,7 +806,8 @@
                     actualizarBotonMaps('');
                     return;
                 }
-                fetch(`/api/get_client_details/${clienteId}/`)
+                // Asumo que tienes una API endpoint de Django para obtener detalles del cliente
+                fetch(`/api/get_client_details/${clienteId}/`) 
                 .then(response => response.json())
                 .then(data => {
                     if(telefonoInput) telefonoInput.value = data.telefono || '';
@@ -720,7 +819,7 @@
         }
 
         // =========================================================
-        // 3. AGREGAR PRODUCTOS
+        // 3. AGREGAR PRODUCTOS (se mantiene)
         // =========================================================
         if (btnAgregar) {
             btnAgregar.onclick = () => {
@@ -729,7 +828,7 @@
                 const info = inputInfo.value.trim();
 
                 if (!prod) {
-                    alert('Ingresa el nombre del producto');
+                    alert('Ingresa el nombre del producto o material');
                     inputProducto.focus();
                     return;
                 }
@@ -743,7 +842,7 @@
         }
 
         // =========================================================
-        // 4. MODAL Y NAVEGACIÓN
+        // 4. MODAL Y NAVEGACIÓN (se mantiene)
         // =========================================================
         if (btnAbrirNuevaOrden) {
             btnAbrirNuevaOrden.onclick = (e) => {
@@ -780,7 +879,7 @@
         }
 
         // =========================================================
-        // 5. BOTÓN LIMPIAR (INTELIGENTE)
+        // 5. BOTÓN LIMPIAR (INTELIGENTE) (se mantiene)
         // =========================================================
         if (btnLimpiar) {
             btnLimpiar.onclick = () => {
@@ -808,7 +907,7 @@
         }
 
         // =========================================================
-        // 6. INICIALIZACIÓN AUTOMÁTICA AL EDITAR
+        // 6. INICIALIZACIÓN AUTOMÁTICA AL EDITAR (se mantiene)
         // =========================================================
         {% if abrir_modal %}
             if (modalNuevaOrden) {
@@ -838,7 +937,7 @@
         {% endif %}
 
         // =========================================================
-        // 7. VALIDACIONES DE GUARDADO (CORREGIDO)
+        // 7. VALIDACIONES DE GUARDADO (se mantiene)
         // =========================================================
         const camposObligatoriosIds = [
             '{{ form_orden.ClienteEmpresa.id_for_label }}',
@@ -864,6 +963,17 @@
                     alert('⚠️ No puedes guardar una orden vacía.\n\nPor favor, agrega al menos un producto.');
                     if(inputProducto) inputProducto.focus();
                 }
+                // Verificación adicional para campos requeridos del formulario principal
+                let camposValidos = true;
+                camposObligatoriosIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.value === '') {
+                        camposValidos = false;
+                        // Opcional: enfocar el primer campo inválido
+                        // el.focus(); 
+                        // event.preventDefault();
+                    }
+                });
             });
         }
 
