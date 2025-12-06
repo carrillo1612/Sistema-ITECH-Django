@@ -39,12 +39,31 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Estilos para el Sidebar Móvil */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sidebar-mobile {
+            position: fixed;
+            inset-y: 0;
+            left: 0;
+            width: 256px;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-out;
+            z-index: 50;
+        }
     </style>
 </head>
 
 <body class="bg-slate-100 text-slate-800 h-[100dvh] flex flex-col overflow-hidden font-sans">
 
-   <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm z-20 shrink-0">
+    <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm z-20 shrink-0">
         <div class="flex items-center gap-4">
             <button id="mobile-menu-btn" onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-500 hover:text-accent">
                 <i class="fas fa-bars text-xl"></i>
@@ -73,13 +92,13 @@
 
     <div class="flex flex-1 overflow-hidden relative">
         
-        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden transition-opacity opacity-0"></div>
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
 
         <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex-col shadow-xl z-40 transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex h-[100dvh] lg:h-auto">
-            <div class="p-6">
+            <div class="p-6 flex-1 overflow-y-auto">
                 <div class="flex justify-between items-center mb-6 lg:hidden">
                     <span class="text-white font-bold text-lg">Menú</span>
-                    <button id="close-sidebar-btn" class="text-slate-400 hover:text-white p-2">
+                    <button id="close-sidebar-btn" onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-2">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
@@ -129,7 +148,7 @@
                 <p class="text-slate-500 text-xs sm:text-sm ml-0 sm:ml-12 mt-2 sm:mt-0">Selecciona una orden pendiente.</p>
             </div>
 
-            <div class="flex-1 px-4 sm:px-8 pt-2 overflow-y-auto smooth-scroll custom-scrollbar pb-24">
+            <div class="flex-1 p-4 sm:p-6 sm:px-8 pt-2 overflow-y-auto smooth-scroll custom-scrollbar pb-24">
                 
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden mb-6">
                     
@@ -142,13 +161,14 @@
                                 <input type="text" name="q" value="{{ search_query }}" placeholder="Buscar orden..." class="pl-10 pr-4 py-2 w-full border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-accent/20 focus:border-accent focus:outline-none transition-all">
                             </form>
                         </div>
-                        <div class="text-xs text-slate-500 font-medium w-full sm:w-auto text-right">
-                            {{ ordenes_pendientes|length }} pendientes
+                        <div class="text-xs text-slate-500 font-medium w-full sm:w-auto text-left sm:text-right">
+                            {% comment %} Se ajustó la clase w-full a text-left para mejor lectura en móvil {% endcomment %}
+                            {{ ordenes_pendientes|length }} órdenes pendientes
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto w-full">
-                        <table class="w-full text-sm text-left text-slate-600 min-w-[600px]">
+                    <div class="overflow-x-auto w-full"> 
+                        <table class="w-full text-sm text-left text-slate-600 min-w-[700px]"> 
                             <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500">
                                 <tr>
                                     <th class="px-4 sm:px-6 py-3">Folio</th>
@@ -182,7 +202,7 @@
                                     </td>
                                     <td class="px-4 sm:px-6 py-4 text-center whitespace-nowrap">
                                         <a href="{% url 'registro_temp' orden.pk %}" class="inline-flex items-center px-3 py-2 bg-accent text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md active:bg-blue-800">
-                                            <i class="fas fa-tools mr-1.5"></i> <span class="">Generar</span>
+                                            <i class="fas fa-tools mr-1.5"></i> <span class="hidden sm:inline">Generar</span>
                                         </a>
                                     </td>
                                 </tr>
@@ -216,22 +236,28 @@
         const overlay = document.getElementById('sidebar-overlay');
         const btnCloseSidebar = document.getElementById('close-sidebar-btn');
 
-        function toggleMenu() {
+        // Función global para manejar el menú
+        function toggleSidebar() {
             const isClosed = sidebar.classList.contains('-translate-x-full');
             if (isClosed) {
+                // Abrir
                 sidebar.classList.remove('-translate-x-full');
                 overlay.classList.remove('hidden');
                 setTimeout(() => overlay.classList.remove('opacity-0'), 10);
             } else {
+                // Cerrar
                 sidebar.classList.add('-translate-x-full');
                 overlay.classList.add('opacity-0');
                 setTimeout(() => overlay.classList.add('hidden'), 300);
             }
         }
 
-        btnMenu.addEventListener('click', toggleMenu);
-        btnCloseSidebar.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Asegúrate de que los botones llamen a la función correcta (que es 'toggleSidebar')
+            btnMenu.addEventListener('click', toggleSidebar);
+            btnCloseSidebar.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+        });
     </script>
 
 </body>

@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Clientes | ITECH</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Lógica de visibilidad del Modal (Mantenida para tu JS) */
+        /* Lógica de visibilidad del Modal */
         .modal {
             display: none; 
             position: fixed; 
@@ -50,12 +50,88 @@
             justify-content: center;
         }
         .modal.is-visible { display: flex; }
+
+        /* Estilos para el Sidebar Móvil */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sidebar-mobile {
+            position: fixed;
+            inset-y: 0;
+            left: 0;
+            width: 256px;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-out;
+            z-index: 50;
+        }
+
+        /* --- Estilos de Controles y Tabla (Adaptación Móvil) --- */
+        @media (max-width: 768px) {
+            
+            /* Controles superiores */
+            .control-toolbar-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .control-toolbar-actions .flex-wrap {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .control-toolbar-actions button#btn_nuevo_cliente {
+                 flex: 1; /* El botón de nuevo cliente se estira */
+                 justify-content: center;
+            }
+            .control-toolbar-actions form {
+                width: 100%; /* La búsqueda se estira */
+            }
+            .control-toolbar-actions #search-input {
+                 width: 100% !important; 
+                 max-width: none !important;
+                 /* La clase w-48 transition-all focus:w-64 se anula */
+            }
+            
+            /* Tabla */
+            .table-container-responsive {
+                overflow-x: auto; /* Permite scroll horizontal */
+            }
+            .data-table-clientes {
+                min-width: 800px; /* Ancho mínimo para forzar scroll */
+            }
+            .data-table-clientes th, .data-table-clientes td {
+                padding-left: 12px;
+                padding-right: 12px;
+                white-space: nowrap; /* Evita que el texto se rompa */
+            }
+
+            /* Modal */
+            .modal-content-lg {
+                width: 100%;
+                max-width: none;
+                height: 100%;
+                border-radius: 0;
+                margin: 0;
+            }
+            .modal-content-lg .grid-cols-2,
+            .modal-content-lg .grid-cols-4 {
+                grid-template-columns: 1fr; /* Apila inputs en el modal */
+                gap: 1rem;
+            }
+            .modal-content-lg .md\:col-span-2 {
+                grid-column: span 1 / span 1;
+            }
+        }
     </style>
 </head>
 
-<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden font-sans">
+<body class="bg-slate-100 text-slate-800 h-[100dvh] flex flex-col overflow-hidden font-sans">
 
-<nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm z-20 shrink-0">
+    <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm z-20 shrink-0">
         <div class="flex items-center gap-4">
             <button id="mobile-menu-btn" onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-500 hover:text-accent">
                 <i class="fas fa-bars text-xl"></i>
@@ -82,73 +158,83 @@
         </div>
     </nav>
 
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1 overflow-hidden relative">
         
-        <aside class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10">
-            <div class="p-6">
-                <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4">Menú Principal</p>
-                   <nav class="space-y-1">
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
+
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex-col shadow-xl z-40 transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex h-[100dvh] lg:h-auto">
+            <div class="p-6 flex-1 overflow-y-auto">
+                <div class="flex justify-between items-center mb-6 lg:hidden">
+                    <span class="text-white font-bold text-lg">Menú</span>
+                    <button id="close-sidebar-btn" onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-2">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4 hidden lg:block">Menú Principal</p>
+                <nav class="space-y-1">
     
-    <a href="{% url 'vista_calendario' %}" 
-        class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
-        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
-    </a>
+                    <a href="{% url 'vista_calendario' %}" 
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-calendar-alt w-5 text-center group-hover:text-accent transition-colors"></i> Calendario
+                    </a>
 
-      <a href="{% url 'lista_ordenes' %}" 
-        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
-    </a>
-    
-    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
-    <a href="{% url 'lista_reportes_pendientes' %}" 
-        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
-    </a>
-    {% endif %}
+                    <a href="{% url 'lista_ordenes' %}" 
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
+                    </a>
+                    
+                    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
+                    <a href="{% url 'lista_reportes_pendientes' %}" 
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
+                    </a>
+                    {% endif %}
 
-    {% if request.user.Rol == 'Administrador' %}
-    
-    <a href="{% url 'lista_clientes' %}" 
-        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
-    </a>
+                    {% if request.user.Rol == 'Administrador' %}
+                    
+                    <a href="{% url 'lista_clientes' %}" 
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
+                        <i class="fas fa-users w-5 text-center text-accent transition-colors"></i> Clientes
+                    </a>
 
 
-    <a href="{% url 'gestion_usuarios' %}" 
-        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
-    </a>
-    {% endif %}
+                    <a href="{% url 'gestion_usuarios' %}" 
+                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
+                    </a>
+                    {% endif %}
 
-</nav>
+                </nav>
             </div>
             <div class="mt-auto p-6 border-t border-slate-800">
-                <p class="text-xs text-center text-slate-600">&copy; 2024 ITECH System</p>
+                <p class="text-xs text-center text-slate-600">&copy; 2025 ITECH System</p>
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50">
+        <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50 w-full h-full">
             
-            <div class="px-8 py-6 pb-2 shrink-0">
+            <div class="px-4 sm:px-8 py-6 pb-2 shrink-0">
                 <div class="flex items-center gap-3 mb-1">
                     <div class="p-2 bg-blue-100 text-accent rounded-lg">
                         <i class="fas fa-users text-xl"></i>
                     </div>
-                    <h1 class="text-2xl font-bold text-slate-800">Gestión de Clientes</h1>
+                    <h1 class="text-xl sm:text-2xl font-bold text-slate-800">Gestión de Clientes</h1>
                 </div>
-                <p class="text-slate-500 text-sm ml-12">Administra la base de datos de tus clientes y sucursales.</p>
+                <p class="text-slate-500 text-xs sm:text-sm ml-10 sm:ml-12">Administra la base de datos de tus clientes y sucursales.</p>
             </div>
 
-            <div class="flex-1 p-6 sm:px-8 pt-4 overflow-y-auto custom-scrollbar">
+            <div class="flex-1 p-4 sm:p-6 sm:px-8 pt-4 overflow-y-auto custom-scrollbar">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden h-full">
                     
-                    <div class="p-4 border-b border-slate-200 bg-white flex flex-wrap justify-between items-center gap-4">
+                    <div class="control-toolbar-actions p-4 border-b border-slate-200 bg-white flex flex-wrap justify-between items-center gap-4">
                         
                         <div class="flex items-center gap-3 text-sm text-slate-600">
-                            </div>
+                            <span class="text-xs font-semibold text-slate-500">Mostrando clientes registrados</span>
+                        </div>
 
-                        <div class="flex items-center gap-3">
-                            <button id="btn_nuevo_cliente" class="bg-accent hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm shadow-blue-500/30 flex items-center gap-2">
+                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                            <button id="btn_nuevo_cliente" class="bg-accent hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm shadow-blue-500/30 flex items-center gap-2 flex-1 sm:flex-none">
                                 <i class="fas fa-plus"></i> Nuevo Cliente
                             </button>
                             
@@ -161,7 +247,7 @@
                                 </button>
                             </div>
 
-                            <form method="GET" action="{% url 'lista_clientes' %}" class="relative">
+                            <form method="GET" action="{% url 'lista_clientes' %}" class="relative flex-1 sm:flex-none">
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                                     <i class="fas fa-search"></i>
                                 </span>
@@ -171,13 +257,13 @@
                                         id="search-input" 
                                         placeholder="Buscar cliente..." 
                                         value="{{ request.GET.q|default:'' }}" 
-                                        class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none w-48 transition-all focus:w-64">
+                                        class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none w-full sm:w-48 transition-all sm:focus:w-64">
                             </form>
                         </div>
                     </div>
 
-                    <div class="flex-1 overflow-auto">
-                        <table class="w-full text-sm text-left text-slate-600">
+                    <div class="flex-1 overflow-y-auto table-container-responsive">
+                        <table class="w-full text-sm text-left text-slate-600 data-table-clientes">
                             <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500 sticky top-0 z-10">
                                 <tr>
                                     <th class="px-6 py-3 border-b border-slate-200 w-16"></th>
@@ -218,7 +304,7 @@
                                     <td class="px-6 py-3 text-slate-500">{{ cliente.Correo }}</td>
                                     <td class="px-6 py-3 text-slate-500">{{ cliente.Telefono }}</td>
                                     <td class="px-6 py-3 text-center">
-                                        <a href="{% url 'editar_cliente' cliente.ClienteID %}" class="text-accent hover:text-blue-700 bg-blue-50 w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-100 transition-all" title="Editar">
+                                        <a href="{% url 'editar_cliente' cliente.ClienteID %}" class="text-accent hover:text-blue-700 bg-blue-50 w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-blue-100 transition-all" title="Editar">
                                             <i class="fas fa-pen text-xs"></i>
                                         </a>
                                     </td>
@@ -239,14 +325,15 @@
                         </table>
                     </div>
                 </div>
+                <div class="h-8 lg:hidden"></div>
             </div>
         </main>
     </div>
 
     <div id="modal_nuevo_cliente" class="modal">
-        <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden transform transition-all">
+        <div class="modal-content-lg modal-content bg-white rounded-xl shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden transform transition-all">
             
-            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-accent">
                         <i class="fas fa-user-plus"></i>
@@ -261,7 +348,7 @@
                 <button class="text-slate-400 hover:text-slate-600 text-2xl leading-none" data-dismiss="modal">&times;</button>
             </div>
 
-            <div class="p-6 overflow-y-auto custom-scrollbar">
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1">
                 
                 {% if cliente_a_editar %}
                     <form id="form_cliente" method="POST" action="{% url 'editar_cliente' cliente_a_editar.ClienteID %}">
@@ -279,7 +366,7 @@
                         </div>
 
                         <div>
-                            <label for="telefono" class="block text-xs font-bold text-slate-600 uppercase mb-1">Teléfono</label>
+                            <label for="telefono" class="block text-xs font-bold text-slate-600 uppercase mb-1">Teléfono *</label>
                             <input type="text" id="telefono" name="Telefono" required value="{{ cliente_a_editar.Telefono|default:'' }}"
                                     class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
                         </div>
@@ -291,25 +378,25 @@
                         </div>
 
                         <div class="md:col-span-2 grid grid-cols-4 gap-4">
-                            <div class="col-span-2">
+                            <div class="col-span-4 sm:col-span-2">
                                 <label for="calle" class="block text-xs font-bold text-slate-600 uppercase mb-1">Calle *</label>
                                 <input type="text" id="calle" name="Calle" required value="{{ cliente_a_editar.Calle|default:'' }}"
                                         class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
                             </div>
-                            <div>
-                                <label for="numero_exterior" class="block text-xs font-bold text-slate-600 uppercase mb-1">Num. Ext</label>
+                            <div class="col-span-2 sm:col-span-1">
+                                <label for="numero_exterior" class="block text-xs font-bold text-slate-600 uppercase mb-1">Num. Ext *</label>
                                 <input type="text" id="numero_exterior" name="NumeroExterior" required value="{{ cliente_a_editar.NumeroExterior|default:'' }}"
                                         class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
                             </div>
-                            <div>
+                            <div class="col-span-2 sm:col-span-1">
                                 <label for="interior" class="block text-xs font-bold text-slate-600 uppercase mb-1">Int</label>
-                                <input type="text" id="interior" name="Interior" required value="{{ cliente_a_editar.Interior|default:'' }}"
+                                <input type="text" id="interior" name="Interior" value="{{ cliente_a_editar.Interior|default:'' }}"
                                         class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
                             </div>
                         </div>
 
                         <div>
-                            <label for="colonia" class="block text-xs font-bold text-slate-600 uppercase mb-1">Colonia</label>
+                            <label for="colonia" class="block text-xs font-bold text-slate-600 uppercase mb-1">Colonia *</label>
                             <input type="text" id="colonia" name="Colonia" required value="{{ cliente_a_editar.Colonia|default:'' }}"
                                     class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
                         </div>
@@ -334,11 +421,11 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <label for="ubicacion" class="block text-xs font-bold text-slate-600 uppercase mb-1">Ubicación (Google Maps)</label>
-                            <div class="flex gap-2">
+                            <label for="ubicacion" class="block text-xs font-bold text-slate-600 uppercase mb-1">Ubicación (Google Maps) *</label>
+                            <div class="flex flex-col sm:flex-row gap-2">
                                 <input type="text" id="ubicacion" name="Ubicacion" required value="{{ cliente_a_editar.Ubicacion|default:'' }}" placeholder="Pega aquí el link..."
                                         class="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all">
-                                <a href="https://www.google.com.mx/maps" target="_blank" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors">
+                                <a href="https://www.google.com.mx/maps" target="_blank" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors w-full sm:w-auto">
                                     <i class="fas fa-map-marked-alt text-accent"></i> Ir a Maps
                                 </a>
                             </div>
@@ -348,7 +435,7 @@
                 </form>
             </div>
 
-            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 shrink-0">
                 <button type="button" data-dismiss="modal" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-white hover:text-slate-800 transition font-medium text-sm">Cancelar</button>
                 <button type="submit" form="form_cliente" class="px-6 py-2 rounded-lg bg-accent text-white hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition font-medium text-sm">Guardar Cliente</button>
             </div>
@@ -356,21 +443,49 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log("DOM Cargado - Clientes (Modo Simple)");
+        // Función global para manejar el menú (adaptada del código anterior)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            // Determina si la sidebar está cerrada (-translate-x-full)
+            const isClosed = sidebar.classList.contains('-translate-x-full');
 
-            // --- Lógica para abrir/cerrar Modal ---
+            if (isClosed) {
+                // Abrir
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                // Cerrar
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM Cargado - Clientes (Adaptado)");
+            
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
             const modal = document.getElementById("modal_nuevo_cliente");
             const btnNuevo = document.getElementById("btn_nuevo_cliente");
             const closeButtons = document.querySelectorAll('[data-dismiss="modal"]');
-            const form = document.getElementById("form_cliente"); // Obtenemos el formulario
+            const form = document.getElementById("form_cliente");
 
+            // --- Lógica de Sidebar (Inicialización) ---
+            if (sidebar && window.innerWidth < 1024) {
+                 sidebar.classList.add('-translate-x-full');
+            }
+
+            // --- Lógica para abrir/cerrar Modal ---
             function closeModal() {
                 if (modal) {
                     modal.classList.remove('is-visible');
                 }
                 // Limpia la URL si es necesario
-                window.history.pushState({}, '', '/clientes/'); // Asegúrate de que esta URL base sea correcta
+                window.history.pushState({}, '', '{% url "lista_clientes" %}');
             }
 
             if (btnNuevo && modal) {
@@ -378,6 +493,11 @@
                     if (form) {
                         form.reset(); 
                     }
+                    // NOTA: Si el formulario es de edición (por URL), hay que redirigir a la URL base de registro para limpiar el estado del servidor.
+                    window.location.href = '{% url "lista_clientes" %}';
+                    
+                    // Abrir modal después de la redirección, aunque si el backend maneja el GET en /clientes/, no es estrictamente necesario aquí.
+                    // Pero para simular la apertura inmediata si ya está en la URL base:
                     modal.classList.add('is-visible');
                 }
             }
@@ -393,11 +513,30 @@
             }
             
             // --- Si estamos en modo edición (viene del backend) ---
-            {% if cliente_a_editar %}
+            {% if cliente_a_editar or form_errors %} 
             if (modal) {
                 modal.classList.add('is-visible');
             }
             {% endif %}
+
+            // --- Lógica de eventos de menú lateral ---
+            const btnCloseSidebar = document.getElementById('close-sidebar-btn');
+            const btnMenu = document.getElementById('mobile-menu-btn');
+
+            if(btnMenu) btnMenu.addEventListener('click', toggleSidebar);
+            if(btnCloseSidebar) btnCloseSidebar.addEventListener('click', toggleSidebar);
+            if(overlay) overlay.addEventListener('click', toggleSidebar);
+
+            // Asegurar que el sidebar se restaure en desktop si se cerró en móvil
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 1024) {
+                    sidebar.classList.remove('-translate-x-full');
+                    overlay.classList.add('hidden');
+                    overlay.classList.add('opacity-0');
+                } else if (window.innerWidth < 1024 && !sidebar.classList.contains('-translate-x-full')) {
+                     sidebar.classList.add('-translate-x-full');
+                }
+            });
         });
     </script>
 </body>
