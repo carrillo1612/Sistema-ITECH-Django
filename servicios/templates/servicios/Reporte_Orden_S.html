@@ -129,7 +129,11 @@
         <table style="margin-bottom: 5px;">
             <tr>
                 <td width="25%" valign="middle" align="left">
-                    <img src="{% static 'img/logo.jpeg' %}" alt="Logo iTECH" class="logo">
+                    {% if logo_url %}
+    <img src="{{ logo_url }}" alt="Logo iTECH" class="logo">
+{% else %}
+    <img src="{% static 'img/logo.jpeg' %}" alt="Logo iTECH" class="logo">
+{% endif %}
                 </td>
                 
                 <td width="50%" align="center" valign="middle">
@@ -306,6 +310,12 @@
             <tr>
                 <td width="20%" align="center" valign="bottom">
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=Orden-{{ orden.OrdenID }}" width="80" height="80"/>
+
+{% if qr_url %}
+    <img src="{{ qr_url }}" width="80" height="80"/>
+{% else %}
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=Orden-{{ orden.OrdenID }}" width="80" height="80"/>
+{% endif %}
                 </td>
                 
                 <td width="40%" align="center" valign="bottom">

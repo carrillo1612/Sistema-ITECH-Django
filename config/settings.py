@@ -1,5 +1,5 @@
 from pathlib import Path
-import os  # <--- AGREGA ESTA LÍNEA AQUÍ ARRIBA
+import os 
 from pathlib import Path
 import dj_database_url
 
@@ -23,10 +23,12 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.68.110', '192.168.1.112', '1
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
 # Application definition
 
 INSTALLED_APPS = [
-    'servicios',  # <--- AÑADE ESTA LÍNEA
+    'servicios', 
+    'storages',  # <--- ¡AÑADIDO! Para el almacenamiento en S3
     
     'django.contrib.admin',
     'django.contrib.auth',
@@ -38,7 +40,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # ⬅️ AÑADE ESTA LÍNEA
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -71,11 +73,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# settings.py
-
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'), # Lee la URL de Render
+        default=os.environ.get('DATABASE_URL'), 
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -101,9 +101,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-LANGUAGE_CODE = 'es-mx'  # <--- Cambiado a Español México
-
-TIME_ZONE = 'America/Mexico_City' # <--- Cambiado a hora del centro de México
+LANGUAGE_CODE = 'es-mx'  
+TIME_ZONE = 'America/Mexico_City' 
 
 USE_I18N = True
 USE_TZ = True
@@ -114,18 +113,13 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-# Define la carpeta donde WhiteNoise trabajará
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # ⬅️ ¡CLAVE!
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = '/login/'
-# --- ESTA ES LA LÍNEA CLAVE ---
-LOGIN_REDIRECT_URL = 'lista_clientes' # Asegúrate de que sea 'lista_clientes'
-
+LOGIN_REDIRECT_URL = 'lista_clientes' 
 LOGOUT_REDIRECT_URL = 'login'
-
-# config/settings.py
 
 AUTH_USER_MODEL = 'servicios.Usuarios'
 
@@ -136,8 +130,34 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# =========================================================================
+# ⚙️ CONFIGURACIÓN DE ALMACENAMIENTO PERMANENTE DE ARCHIVOS MEDIA (AWS S3)
+# =========================================================================
 
+# 1. Credenciales leídas de las variables de entorno de Render
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+
+# 2. Especificar la región del bucket (Oregón)
+AWS_S3_REGION_NAME = 'us-west-2' 
+
+# 3. Indicar a Django que use S3 para almacenar archivos subidos (MEDIA)
+DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
+
+# 4. Configurar el dominio público para la URL de acceso
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+
+# 5. Deshabilitar la autenticación en la URL (para acceso público a las fotos)
+AWS_QUERYSTRING_AUTH = False 
+
+# ❌ NOTA: Hemos eliminado MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# El almacenamiento es ahora totalmente en la nube.
+
+# =========================================================================
+
+# NOTA: Los tokens de Telegram son sensibles y se recomienda moverlos
+# a variables de entorno también. Por ahora los dejamos aquí, pero es una mejora futura.
 TELEGRAM_BOT_TOKEN = '8205329300:AAHPQG-YuMIcrwM3a2bNgWUa2SdpLdFlQIw' 
 TELEGRAM_CHAT_ID = '-5045908595'
