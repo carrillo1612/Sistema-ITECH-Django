@@ -149,8 +149,8 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 
-# 5. Deshabilitar la autenticación en la URL (para acceso público a las fotos)
-AWS_QUERYSTRING_AUTH = False 
+# 5. Permite que todos los archivos subidos sean públicos por defecto <--- ¡LÍNEA CLAVE AÑADIDA!
+AWS_DEFAULT_ACL = 'public-read'
 
 # ❌ NOTA: Hemos eliminado MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # El almacenamiento es ahora totalmente en la nube.
