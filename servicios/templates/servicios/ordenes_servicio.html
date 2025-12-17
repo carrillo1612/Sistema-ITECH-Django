@@ -296,30 +296,45 @@
                 </div>
 
                 <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4 hidden lg:block">Menú Principal</p>
-                <nav class="space-y-1">
-                    <a href="{% url 'vista_calendario' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
-                        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
-                    </a>
-                    
-                    <a href="{% url 'lista_ordenes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-                        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
-                    </a>
+                                <nav class="space-y-1">
+    {# 1. CALENDARIO: Visible para todos #}
+    <a href="{% url 'vista_calendario' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
+        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
+    </a>
+    
+    {# 2. ÓRDENES: Visible para todos #}
+    <a href="{% url 'lista_ordenes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
+    </a>
 
-                    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
-                    <a href="{% url 'lista_reportes_pendientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-                        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
-                    </a>
-                    {% endif %}
+    {# 3. GENERAR REPORTE: Visible para Administrador y Técnico #}
+    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
+    <a href="{% url 'lista_reportes_pendientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
+    </a>
+    {% endif %}
 
-                    {% if request.user.Rol == 'Administrador' %}
-                    <a href="{% url 'lista_clientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-                        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
-                    </a>
-                    <a href="{% url 'gestion_usuarios' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-                        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
-                    </a>
-                    {% endif %}
-                </nav>
+    {# 4. CLIENTES Y USUARIOS: SOLO visible para el Administrador #}
+    {% if request.user.Rol == 'Administrador' %}
+    <a href="{% url 'lista_clientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
+    </a>
+    <a href="{% url 'gestion_usuarios' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
+    </a>
+    {% endif %}
+
+    {# --- SECCIÓN DE SALIDA --- #}
+    <div class="pt-4 mt-4 border-t border-slate-800">
+        <form action="{% url 'logout' %}" method="post" class="w-full">
+            {% csrf_token %}
+            <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all group">
+                <i class="fas fa-sign-out-alt w-5 text-center group-hover:scale-110 transition-transform"></i> 
+                <span class="font-medium text-sm">Cerrar Sesión</span>
+            </button>
+        </form>
+    </div>
+</nav>
             </div>
             <div class="mt-auto p-6 border-t border-slate-800 shrink-0">
                 <p class="text-xs text-center text-slate-600">&copy; 2024 ITECH System</p>
