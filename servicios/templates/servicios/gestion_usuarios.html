@@ -19,8 +19,8 @@
                         sans: ['Inter', 'sans-serif'],
                     },
                     colors: {
-                        primary: '#0F172A', // Azul oscuro elegante
-                        accent: '#2563EB',  // Azul brillante para acciones
+                        primary: '#0F172A',
+                        accent: '#2563EB',
                     }
                 }
             }
@@ -60,51 +60,19 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
-        .sidebar-mobile {
-            position: fixed;
-            inset-y: 0;
-            left: 0;
-            width: 256px;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-out;
-            z-index: 50;
-        }
 
-        /* --- Estilos de Controles y Tabla (Adaptación Móvil) --- */
         @media (max-width: 768px) {
-            
-            /* Controles superiores */
             .control-toolbar {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 10px;
             }
-            .control-toolbar .flex-wrap {
-                width: 100%;
-                justify-content: space-between;
-            }
-            .control-toolbar .relative {
-                width: 100%; /* La barra de búsqueda ocupa todo el ancho */
-            }
-            .control-toolbar #search-input {
-                 width: 100% !important; /* Asegura el ancho completo */
-                 max-width: none !important;
-            }
-            
-            /* Tabla */
             .table-container-responsive {
-                overflow-x: auto; /* Permite scroll horizontal */
+                overflow-x: auto;
             }
             .data-table-users {
-                min-width: 650px; /* Ancho mínimo para forzar scroll */
+                min-width: 650px;
             }
-            .data-table-users th, .data-table-users td {
-                padding-left: 12px;
-                padding-right: 12px;
-                white-space: nowrap; /* Evita que el texto se rompa */
-            }
-
-            /* Modal */
             .modal-content {
                 width: 100%;
                 max-width: none;
@@ -113,7 +81,7 @@
                 margin: 0;
             }
             .modal-content .grid-cols-2 {
-                grid-template-columns: 1fr; /* Apila inputs en el modal */
+                grid-template-columns: 1fr;
                 gap: 1rem;
             }
         }
@@ -151,9 +119,9 @@
 
     <div class="flex flex-1 overflow-hidden relative">
         
-        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden transition-opacity duration-300 opacity-0" onclick="toggleSidebar()"></div>
 
-        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex-col shadow-xl z-40 transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex h-[100dvh] lg:h-auto shrink-0">
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl z-40 transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static shrink-0">
             <div class="p-6 overflow-y-auto flex-1">
                 <div class="flex justify-between items-center mb-6 lg:hidden">
                     <span class="text-white font-bold text-lg">Menú</span>
@@ -163,45 +131,40 @@
                 </div>
 
                 <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4 hidden lg:block">Menú Principal</p>
-                      <nav class="space-y-1">
-    {# 1. CALENDARIO: Visible para todos #}
-    <a href="{% url 'vista_calendario' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
-        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
-    </a>
-    
-    {# 2. ÓRDENES: Visible para todos #}
-    <a href="{% url 'lista_ordenes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
-    </a>
+                <nav class="space-y-1">
+                    <a href="{% url 'vista_calendario' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-all group">
+                        <i class="fas fa-calendar-alt w-5 text-center group-hover:text-accent transition-colors"></i> Calendario
+                    </a>
+                    
+                    <a href="{% url 'lista_ordenes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
+                    </a>
 
-    {# 3. GENERAR REPORTE: Visible para Administrador y Técnico #}
-    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
-    <a href="{% url 'lista_reportes_pendientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
-    </a>
-    {% endif %}
+                    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
+                    <a href="{% url 'lista_reportes_pendientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
+                    </a>
+                    {% endif %}
 
-    {# 4. CLIENTES Y USUARIOS: SOLO visible para el Administrador #}
-    {% if request.user.Rol == 'Administrador' %}
-    <a href="{% url 'lista_clientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
-    </a>
-    <a href="{% url 'gestion_usuarios' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
-    </a>
-    {% endif %}
+                    {% if request.user.Rol == 'Administrador' %}
+                    <a href="{% url 'lista_clientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
+                    </a>
+                    <a href="{% url 'gestion_usuarios' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
+                        <i class="fas fa-user-cog w-5 text-center text-accent"></i> Usuarios
+                    </a>
+                    {% endif %}
 
-    {# --- SECCIÓN DE SALIDA --- #}
-    <div class="pt-4 mt-4 border-t border-slate-800">
-        <form action="{% url 'logout' %}" method="post" class="w-full">
-            {% csrf_token %}
-            <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all group">
-                <i class="fas fa-sign-out-alt w-5 text-center group-hover:scale-110 transition-transform"></i> 
-                <span class="font-medium text-sm">Cerrar Sesión</span>
-            </button>
-        </form>
-    </div>
-</nav>
+                    <div class="pt-4 mt-4 border-t border-slate-800">
+                        <form action="{% url 'logout' %}" method="post" class="w-full">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all group">
+                                <i class="fas fa-sign-out-alt w-5 text-center group-hover:scale-110 transition-transform"></i> 
+                                <span class="font-medium text-sm">Cerrar Sesión</span>
+                            </button>
+                        </form>
+                    </div>
+                </nav>
             </div>
             <div class="mt-auto p-6 border-t border-slate-800 shrink-0">
                 <p class="text-xs text-center text-slate-600">&copy; 2024 ITECH System</p>
@@ -209,7 +172,6 @@
         </aside>
 
         <main class="flex-1 flex flex-col min-w-0 bg-slate-50/50 w-full h-full">
-            
             <div class="px-4 sm:px-8 py-6 pb-2 shrink-0">
                 <div class="flex items-center gap-3 mb-1">
                     <div class="p-2 bg-blue-100 text-accent rounded-lg">
@@ -224,16 +186,9 @@
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden h-full">
                     
                     <div class="control-toolbar p-4 border-b border-slate-200 bg-white flex flex-wrap justify-between items-center gap-4">
-                        
                         <div class="flex items-center gap-3 text-sm text-slate-600 flex-wrap">
                             <div class="flex items-center gap-2 border-r border-slate-200 pr-3 mr-1">
-                                <span>Mostrar</span>
-                                <select class="bg-slate-50 border border-slate-300 rounded px-2 py-1 focus:outline-none focus:border-accent">
-                                    <option>15</option>
-                                    <option>30</option>
-                                    <option>50</option>
-                                </select>
-                                <span>registros</span>
+                                <span>Mostrando registros registrados</span>
                             </div>
                         </div>
 
@@ -243,18 +198,11 @@
                             </button>
                             
                             <form method="GET" action="{% url 'gestion_usuarios' %}" class="relative flex-1">
-        
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                                     <i class="fas fa-search"></i>
                                 </span>
-                                
-                                <input type="text" 
-                                    name="q" 
-                                    id="search-input" 
-                                    placeholder="Buscar usuario..." 
-                                    value="{{ request.GET.q|default:'' }}" 
-                                    class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none w-full transition-all focus:w-full sm:w-48 sm:focus:w-64">
-                                
+                                <input type="text" name="q" id="search-input" placeholder="Buscar usuario..." value="{{ request.GET.q|default:'' }}" 
+                                       class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none w-full transition-all sm:w-48 sm:focus:w-64">
                             </form>
                         </div>
                     </div>
@@ -274,29 +222,13 @@
                             <tbody class="divide-y divide-slate-200">
                                 {% for usuario in lista_usuarios %}
                                 <tr class="hover:bg-slate-50 transition-colors group">
-                                    <td class="px-4 sm:px-6 py-3 font-mono text-xs font-bold text-slate-500 bg-slate-50/50">
-                                        {{ usuario.UsuarioID }}
-                                    </td>
-                                    <td class="px-4 sm:px-6 py-3 font-medium text-slate-800">
-                                        {{ usuario.Nombre }} {{ usuario.Apellido }}
-                                    </td>
-                                    <td class="px-4 sm:px-6 py-3 text-slate-500">
-                                        {{ usuario.CorreoElectronico }}
-                                    </td>
+                                    <td class="px-4 sm:px-6 py-3 font-mono text-xs font-bold text-slate-500 bg-slate-50/50">{{ usuario.UsuarioID }}</td>
+                                    <td class="px-4 sm:px-6 py-3 font-medium text-slate-800">{{ usuario.Nombre }} {{ usuario.Apellido }}</td>
+                                    <td class="px-4 sm:px-6 py-3 text-slate-500">{{ usuario.CorreoElectronico }}</td>
                                     <td class="px-4 sm:px-6 py-3">
-                                        {% if usuario.Rol == 'Administrador' %}
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                                {{ usuario.Rol }}
-                                            </span>
-                                        {% elif usuario.Rol == 'Soporte' or usuario.Rol == 'Técnico' %}
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                {{ usuario.Rol }}
-                                            </span>
-                                        {% else %}
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
-                                                {{ usuario.Rol|default:'Usuario' }}
-                                            </span>
-                                        {% endif %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if usuario.Rol == 'Administrador' %}bg-purple-100 text-purple-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                            {{ usuario.Rol }}
+                                        </span>
                                     </td>
                                     <td class="px-4 sm:px-6 py-3">
                                         <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
@@ -305,247 +237,149 @@
                                     </td>
                                     <td class="px-4 sm:px-6 py-3 text-center flex justify-center gap-2">
                                         <a href="{% url 'editar_usuario' usuario.UsuarioID %}" class="text-slate-400 hover:text-accent transition-colors" title="Editar">
-                                            <i class="fas fa-pen"></i>
+                                            <i class="fas fa-pen text-xs"></i>
                                         </a>
                                         <form action="{% url 'eliminar_usuario' usuario.UsuarioID %}" method="POST" class="inline">
                                             {% csrf_token %}
-                                            <button type="submit" class="text-slate-400 hover:text-red-500 transition-colors" 
-                                                    onclick="return confirm('¿Estás seguro de que deseas eliminar a {{ usuario.Nombre }} {{ usuario.Apellido }}?');"
-                                                    title="Eliminar">
-                                                <i class="fas fa-trash-alt"></i>
+                                            <button type="submit" class="text-slate-400 hover:text-red-500 transition-colors" onclick="return confirm('¿Eliminar usuario?');">
+                                                <i class="fas fa-trash-alt text-xs"></i>
                                             </button>
                                         </form>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center text-slate-500">
-                                        <div class="flex flex-col items-center justify-center">
-                                            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3 text-slate-300">
-                                                <i class="fas fa-user-slash text-3xl"></i>
-                                            </div>
-                                            <p>No hay usuarios registrados en el sistema.</p>
-                                        </div>
-                                    </td>
+                                    <td colspan="6" class="px-6 py-12 text-center text-slate-500">No hay usuarios registrados.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="h-8 lg:hidden"></div> 
             </div>
         </main>
     </div>
 
     <div id="modal_usuario" class="modal">
-        <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-lg flex flex-col transform transition-all">
-            
-            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 rounded-t-xl shrink-0">
+        <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-lg flex flex-col transform transition-all overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-accent">
                         <i class="fas fa-user-plus"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-lg text-slate-800">
-                            {% if usuario_a_editar %}Editar Usuario{% else %}Crear Nuevo Usuario{% endif %}
-                        </h3>
+                        <h3 class="font-bold text-lg text-slate-800">{% if usuario_a_editar %}Editar Usuario{% else %}Crear Nuevo Usuario{% endif %}</h3>
                         <p class="text-xs text-slate-500">Información de acceso y perfil</p>
                     </div>
                 </div>
-                <button class="text-slate-400 hover:text-slate-600 text-2xl leading-none outline-none" data-close-modal>&times;</button>
+                <button class="text-slate-400 hover:text-slate-600 text-2xl" data-close-modal>&times;</button>
             </div>
 
             <div class="p-6 overflow-y-auto flex-1">
-                
-                {% if usuario_a_editar %}
-                    <form id="form_usuario" method="POST" action="{% url 'editar_usuario' usuario_a_editar.UsuarioID %}">
-                {% else %}
-                    <form id="form_usuario" method="POST" action="{% url 'gestion_usuarios' %}">
-                {% endif %}
+                <form id="form_usuario" method="POST" action="{% if usuario_a_editar %}{% url 'editar_usuario' usuario_a_editar.UsuarioID %}{% else %}{% url 'gestion_usuarios' %}{% endif %}">
                     {% csrf_token %}
                     
                     {% if form_usuario.non_field_errors %}
-                        <div class="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
-                            {{ form_usuario.non_field_errors }}
-                        </div>
+                        <div class="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">{{ form_usuario.non_field_errors }}</div>
                     {% endif %}
 
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre(s)</label>
-                            <input type="text" name="{{ form_usuario.Nombre.name }}" value="{{ form_usuario.Nombre.value|default:'' }}" 
-                                   class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
-                                   required>
-                            {% if form_usuario.Nombre.errors %}<p class="text-red-500 text-xs mt-1">{{ form_usuario.Nombre.errors.0 }}</p>{% endif %}
+                            <input type="text" name="Nombre" value="{{ form_usuario.Nombre.value|default:'' }}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:border-accent outline-none" required>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Apellido(s)</label>
-                            <input type="text" name="{{ form_usuario.Apellido.name }}" value="{{ form_usuario.Apellido.value|default:'' }}" 
-                                   class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
-                                   required>
-                            {% if form_usuario.Apellido.errors %}<p class="text-red-500 text-xs mt-1">{{ form_usuario.Apellido.errors.0 }}</p>{% endif %}
+                            <input type="text" name="Apellido" value="{{ form_usuario.Apellido.value|default:'' }}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:border-accent outline-none" required>
                         </div>
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Teléfono</label>
-                        <input type="text" name="{{ form_usuario.NumeroTelefono.name }}" value="{{ form_usuario.NumeroTelefono.value|default:'' }}" 
-                               class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
-                               required>
+                        <input type="text" name="NumeroTelefono" value="{{ form_usuario.NumeroTelefono.value|default:'' }}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:border-accent outline-none" required>
                     </div>
 
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Correo Electrónico (Login)</label>
-                        <input type="email" name="{{ form_usuario.CorreoElectronico.name }}" value="{{ form_usuario.CorreoElectronico.value|default:'' }}" 
-                               class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
-                               required>
-                        {% if form_usuario.CorreoElectronico.errors %}<p class="text-red-500 text-xs mt-1">{{ form_usuario.CorreoElectronico.errors.0 }}</p>{% endif %}
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Correo Electrónico</label>
+                        <input type="email" name="CorreoElectronico" value="{{ form_usuario.CorreoElectronico.value|default:'' }}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:border-accent outline-none" required>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        
                         <div>
-                            <label for="{{ form_usuario.Rol.id_for_label }}" class="block text-xs font-bold text-slate-600 uppercase mb-1">
-                                Rol <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <select name="{{ form_usuario.Rol.name }}" 
-                                        id="{{ form_usuario.Rol.id_for_label }}" 
-                                        required
-                                        class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent appearance-none cursor-pointer">
-                                    
-                                    <option value="" disabled {% if not usuario_a_editar or not form_usuario.Rol.value %}selected{% endif %}>
-                                        ---------
-                                    </option>
-
-                                    {% for value, label in form_usuario.Rol.field.choices %}
-                                        {% if value %}
-                                            <option value="{{ value }}" 
-                                                {% if form_usuario.Rol.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>
-                                                {{ label }}
-                                            </option>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
-                                
-                                <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none"></i>
-                            </div>
-                            {% if form_usuario.Rol.errors %}
-                                <p class="text-red-500 text-xs mt-1">{{ form_usuario.Rol.errors.0 }}</p>
-                            {% endif %}
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Rol</label>
+                            <select name="Rol" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:border-accent outline-none" required>
+                                <option value="" disabled {% if not form_usuario.Rol.value %}selected{% endif %}>---------</option>
+                                {% for value, label in form_usuario.Rol.field.choices %}
+                                    {% if value %}
+                                        <option value="{{ value }}" {% if form_usuario.Rol.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">
-                                Contraseña <span class="text-red-500">{% if not usuario_a_editar %}*{% endif %}</span>
-                            </label>
-                            <input type="password" name="{{ form_usuario.password.name }}" 
-                                   class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
-                                   {% if not usuario_a_editar %}required{% endif %}>
-                            </div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Contraseña</label>
+                            <input type="password" name="password" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:border-accent outline-none" {% if not usuario_a_editar %}required{% endif %}>
+                        </div>
                     </div>
-
                 </form>
             </div>
 
-            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 rounded-b-xl shrink-0">
-                <button type="button" data-close-modal class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-white hover:text-slate-800 transition font-medium text-sm">Cancelar</button>
-                <button type="submit" form="form_usuario" class="px-6 py-2 rounded-lg bg-accent text-white hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition font-medium text-sm">Guardar Usuario</button>
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 shrink-0">
+                <button type="button" data-close-modal class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-white text-sm font-medium transition">Cancelar</button>
+                <button type="submit" form="form_usuario" class="px-6 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">Guardar Usuario</button>
             </div>
         </div>
     </div>
 
     <script>
-     // Función global para manejar el menú (necesario para el onclick en HTML)
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        const isClosed = sidebar.classList.contains('-translate-x-full');
-
-        if (isClosed) {
-            sidebar.classList.remove('-translate-x-full');
-            overlay.classList.remove('hidden');
-            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-        } else {
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('opacity-0');
-            setTimeout(() => overlay.classList.add('hidden'), 300);
-        }
-    }
-
-        document.addEventListener('DOMContentLoaded', function() {
+        function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
-            const btnNuevo = document.getElementById('btn_nuevo_usuario');
+            const isHidden = sidebar.classList.contains('-translate-x-full');
+
+            if (isHidden) {
+                // ABRIR
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    overlay.classList.add('opacity-100');
+                }, 10);
+            } else {
+                // CERRAR
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.remove('opacity-100');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('modal_usuario');
+            const btnNuevo = document.getElementById('btn_nuevo_usuario');
+            const closeButtons = document.querySelectorAll('[data-close-modal]');
             const form = document.getElementById('form_usuario');
 
-            // --- Lógica del Modal ---
             function openModal() {
-                // Asegura que el modal ocupe la pantalla completa en móvil
                 document.body.classList.add('overflow-hidden');
                 modal.classList.add('is-visible');
             }
 
             function closeModal() {
-                // Limpia la clase y restaura el scroll del body
                 modal.classList.remove('is-visible');
                 document.body.classList.remove('overflow-hidden');
-                
                 if(form) form.reset();
-                
-                // Si la URL es de edición, limpiarla sin recargar la página (HTML5 History API)
-                if (window.history.pushState) {
-                    const currentPath = window.location.pathname;
-                    if (currentPath.includes('/editar_usuario/')) {
-                         window.history.pushState({}, '', '/gestion_usuarios/'); 
-                    }
+                if (window.history.pushState && window.location.pathname.includes('/editar_usuario/')) {
+                    window.history.pushState({}, '', '/gestion_usuarios/'); 
                 }
             }
-            
-            // Asignación de Eventos
+
             if(btnNuevo) btnNuevo.onclick = openModal;
-            
-            document.querySelectorAll('[data-close-modal]').forEach(button => {
-                 button.addEventListener('click', closeModal);
-            });
+            closeButtons.forEach(btn => btn.onclick = closeModal);
 
-            window.onclick = function(event) {
-                if (event.target === modal) {
-                    closeModal();
-                }
-            };
-            
-            // Si el backend envió errores o estamos en modo edición, abrir el modal.
-            {% if usuario_a_editar or form_usuario.errors %}
-                openModal();
-            {% endif %}
+            window.onclick = function(event) { if (event.target === modal) closeModal(); };
 
-            // --- Lógica de Sidebar (Inicialización y Resize) ---
-            if (sidebar && window.innerWidth < 1024) {
-                 sidebar.style.transform = 'translateX(-100%)';
-            }
-
-            // Manejo de botones de menú lateral
-            const btnCloseSidebar = document.getElementById('close-sidebar-btn');
-            const btnMenu = document.getElementById('mobile-menu-btn');
-
-            if(btnMenu) btnMenu.addEventListener('click', toggleSidebar);
-            if(btnCloseSidebar) btnCloseSidebar.addEventListener('click', toggleSidebar);
-            if(overlay) overlay.addEventListener('click', toggleSidebar);
-
-            // Asegurar que el sidebar se restaure en desktop si se cerró en móvil
-            window.addEventListener('resize', function() {
-                if (window.innerWidth >= 1024) {
-                    sidebar.classList.remove('-translate-x-full');
-                    overlay.classList.add('hidden');
-                    overlay.classList.add('opacity-0');
-                } else if (window.innerWidth < 1024 && !sidebar.classList.contains('-translate-x-full')) {
-                    // Si el sidebar estaba abierto en móvil y el usuario redimensiona a móvil, asegúrate de que use el transform
-                    sidebar.classList.add('-translate-x-full');
-                    overlay.classList.add('hidden');
-                }
-            });
+            {% if usuario_a_editar or form_usuario.errors %} openModal(); {% endif %}
         });
     </script>
 </body>
