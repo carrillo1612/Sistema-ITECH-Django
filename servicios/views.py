@@ -784,61 +784,55 @@ def lista_reportes_pendientes_view(request):
 
 def link_callback(uri, rel):
     """
-    Convierte URLs de HTML a rutas absolutas del sistema para xhtml2pdf.
-    Versión Robusta para Windows con DEPURACIÓN DE LOGO.
+    Convierte URLs de HTML a rutas utilizables por xhtml2pdf.
+    Soporta URLs firmadas de S3, Base64 (QR) y archivos estáticos locales (Logo).
     """
     uri = uri.strip()
 
-    # 1. Si es una imagen Base64 (QR), la dejamos pasar intacta.
-    if uri.startswith('data:'):
-        return uri
-
-    # 2. Si es un link de internet, lo dejamos pasar.
+    # 1. Si es una URL de internet (S3 con firma), la devolvemos intacta.
+    # Esto permite que xhtml2pdf descargue la imagen usando el token de seguridad.
     if uri.lower().startswith('http') or uri.startswith('//'):
         return uri
 
-    sUrl = settings.STATIC_URL        # /static/
-    mUrl = settings.MEDIA_URL         # /media/
-    mRoot = settings.MEDIA_ROOT       # Ruta física media
-    sRoot = settings.STATIC_ROOT      # Ruta física static
+    # 2. Si es una imagen Base64 (Códigos QR), la dejamos pasar intacta.
+    if uri.startswith('data:'):
+        return uri
+
+    # 3. Manejo de archivos ESTÁTICOS locales (como el LOGO)
+    sUrl = settings.STATIC_URL        # Generalmente '/static/'
+    sRoot = settings.STATIC_ROOT      # Carpeta donde Render guarda estáticos recopilados
     
     path = uri # Valor por defecto
 
-    # 3. Convertir URL de Media a Ruta Física
-    if uri.startswith(mUrl):
-        path = os.path.join(mRoot, uri.replace(mUrl, ""))
-    
-    # 4. Convertir URL Estática a Ruta Física
-    elif uri.startswith(sUrl):
+    if uri.startswith(sUrl):
         clean_uri = uri.replace(sUrl, "")
         
-        # A) Buscar primero en la carpeta static de la app (Desarrollo)
-        path = os.path.join(settings.BASE_DIR, 'servicios', 'static', clean_uri)
+        # A) Buscar en STATIC_ROOT (Ruta de producción en Render)
+        if sRoot:
+            path = os.path.join(sRoot, clean_uri)
         
-        # B) Si no está ahí, buscar en la carpeta 'static' general
+        # B) Si no existe en root, buscar en la carpeta static del proyecto
         if not os.path.isfile(path):
              path = os.path.join(settings.BASE_DIR, 'static', clean_uri)
              
-        # C) Si no, buscar en STATIC_ROOT (Producción)
-        if not os.path.isfile(path) and sRoot:
-            path = os.path.join(sRoot, clean_uri)
-             
-    # 5. Normalizar barras para Windows (solo si es ruta local)
+        # C) Búsqueda específica en la carpeta de la app
+        if not os.path.isfile(path):
+            path = os.path.join(settings.BASE_DIR, 'servicios', 'static', clean_uri)
+
+    # 4. Normalizar la ruta (importante para evitar errores de barras)
     path = os.path.normpath(path)
 
-    # ======================================================
-    # 🕵️‍♂️ TRAMPA DE DEPURACIÓN PARA EL LOGO
-    # ======================================================
-    if "logo" in str(uri).lower() or "logo" in str(path).lower():
+    # 5. DEPURACIÓN DE LOGO (Opcional, útil para ver si Render encuentra el logo)
+    if "logo" in str(uri).lower():
         print(f"\n🔍 --- DEPURACIÓN DE LOGO ---")
-        print(f"   1. URI recibida del HTML: {uri}")
-        print(f"   2. Ruta calculada en disco: {path}")
-        print(f"   3. ¿El archivo existe?: {os.path.isfile(path)}")
+        print(f" 1. URI recibida: {uri}")
+        print(f" 2. Ruta final en disco: {path}")
+        print(f" 3. ¿Existe el archivo?: {os.path.isfile(path)}")
         print(f"------------------------------\n")
-    # ======================================================
 
-    # 6. Verificación final
-    if not os.path.isfile(path):
+    # 6. Verificación final para archivos locales
+    # Si NO es una URL de internet y el archivo físico no existe, devolvemos None
+    if not uri.lower().startswith('http') and not os.path.isfile(path):
         print(f"⚠️ AVISO PDF: No se encontró la imagen local: {path}")
         return None 
 
