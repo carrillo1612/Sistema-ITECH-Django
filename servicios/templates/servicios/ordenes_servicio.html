@@ -257,10 +257,10 @@
 
     <nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm z-20 shrink-0">
         <div class="flex items-center gap-4">
-            <button id="mobile-menu-btn" onclick="toggleSidebar()" class="md:hidden p-2 text-slate-500 hover:text-accent">
+            <button id="mobile-menu-btn" onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-500 hover:text-accent">
                 <i class="fas fa-bars text-xl"></i>
             </button>
-
+            
             <div class="flex items-center gap-2">
                 <img src="{% static 'img/logo.jpeg' %}" alt="Logo" class="h-8 w-auto object-contain">
                 <span class="font-bold text-xl tracking-tight text-slate-900">ITECH</span>
@@ -284,50 +284,41 @@
 
     <div class="flex flex-1 overflow-hidden relative">
         
-        <div id="sidebar-overlay" class="sidebar-overlay hidden md:hidden" onclick="toggleSidebar()"></div>
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
 
-        <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10 sidebar-mobile md:static md:translate-x-0">
-            <div class="p-6 flex-1 overflow-y-auto">
-                
-                <div class="flex justify-between items-center mb-6 md:hidden">
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex-col shadow-xl z-40 transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex h-[100dvh] lg:h-auto shrink-0">
+            <div class="p-6 overflow-y-auto flex-1">
+                <div class="flex justify-between items-center mb-6 lg:hidden">
                     <span class="text-white font-bold text-lg">Menú</span>
-                    <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-2">
+                    <button id="close-sidebar-btn" onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-2">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
-                <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4 hidden md:block">Menú Principal</p>
-                
-                <nav class="space-y-1">
-    
-                    <a href="{% url 'vista_calendario' %}" 
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-                        <i class="fas fa-calendar-alt w-5 text-center group-hover:text-accent transition-colors"></i> Calendario
-                    </a>
 
-                    <a href="{% url 'lista_ordenes' %}" 
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
-                        <i class="fas fa-file-invoice w-5 text-center text-accent transition-colors"></i> Órdenes
+                <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4 hidden lg:block">Menú Principal</p>
+                <nav class="space-y-1">
+                    <a href="{% url 'vista_calendario' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
+                        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
                     </a>
                     
+                    <a href="{% url 'lista_ordenes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
+                    </a>
+
                     {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
-                    <a href="{% url 'lista_reportes_pendientes' %}" 
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                    <a href="{% url 'lista_reportes_pendientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
                         <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
                     </a>
                     {% endif %}
 
                     {% if request.user.Rol == 'Administrador' %}
-                    <a href="{% url 'lista_clientes' %}" 
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                    <a href="{% url 'lista_clientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
                         <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
                     </a>
-
-                    <a href="{% url 'gestion_usuarios' %}" 
-                        class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+                    <a href="{% url 'gestion_usuarios' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
                         <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
                     </a>
                     {% endif %}
-
                 </nav>
             </div>
             <div class="mt-auto p-6 border-t border-slate-800 shrink-0">
