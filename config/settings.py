@@ -80,7 +80,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 LANGUAGE_CODE = 'es-mx'  
 TIME_ZONE = 'America/Mexico_City' 
-
 USE_I18N = True
 USE_TZ = True
 
@@ -102,17 +101,17 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # =========================================================================
-# ⚙️ CONFIGURACIÓN DE ALMACENAMIENTO PERMANENTE (AWS S3) - MODO FIRMADO
+# ⚙️ CONFIGURACIÓN DE ALMACENAMIENTO AWS S3 - SOLUCIÓN PARA PDF
 # =========================================================================
 
-# 1. Credenciales (Asegurarse de que estén en el panel Environment de Render)
+# 1. Credenciales (Configuradas en el panel Environment de Render)
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = 'us-west-2' 
 
-# 2. Configuración de Almacenamiento (OBLIGATORIO para Django 4.2+)
-# Esto le dice a Django que use S3 para Media y WhiteNoise para Estáticos
+# 2. Configuración de Almacenamiento (Estándar Django 4.2+)
+# Centraliza S3 para archivos subidos y WhiteNoise para CSS/JS locales
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.s3.S3Storage",
@@ -122,21 +121,18 @@ STORAGES = {
     },
 }
 
-# 3. Indicar a Django que use S3 para almacenar archivos subidos (MEDIA)
-DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
-
-# 4. Configuración de Dominio y URL
-# IMPORTANTE: AWS_S3_CUSTOM_DOMAIN debe ser None y MEDIA_URL NO debe definirse 
-# manualmente para que django-storages genere las firmas de seguridad.
+# 3. Forzar URLs Absolutas y Firmas de Seguridad
+# IMPORTANTE: AWS_S3_CUSTOM_DOMAIN debe ser None para que funcione la firma
 AWS_S3_CUSTOM_DOMAIN = None
+AWS_S3_URL_PROTOCOL = 'https'
 
-# 5. Seguridad y Firmas (Esto genera el token ?X-Amz-Algorithm... en las URLs)
+# 4. Generación de Tokens de Acceso (Evita el Access Denied)
 AWS_QUERYSTRING_AUTH = True  
 AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_FILE_OVERWRITE = False
-AWS_DEFAULT_ACL = None # Usamos permisos privados porque la firma autoriza el acceso
-# AÑADE ESTA LÍNEA:
-AWS_S3_URL_PROTOCOL = 'https'
+AWS_DEFAULT_ACL = None 
+
+# NOTA: MEDIA_URL no se define manualmente para permitir que S3 genere URLs dinámicas
 # =========================================================================
 
 TELEGRAM_BOT_TOKEN = '8205329300:AAHPQG-YuMIcrwM3a2bNgWUa2SdpLdFlQIw' 
