@@ -109,9 +109,18 @@ AUTHENTICATION_BACKENDS = [
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-
-# 2. Especificar la región del bucket
 AWS_S3_REGION_NAME = 'us-west-2' 
+
+# 2. Configuración de Almacenamiento (OBLIGATORIO para Django 4.2+)
+# Esto le dice a Django que use S3 para Media y WhiteNoise para Estáticos
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # 3. Indicar a Django que use S3 para almacenar archivos subidos (MEDIA)
 DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
