@@ -120,6 +120,7 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
 # IMPORTANTE: AWS_S3_CUSTOM_DOMAIN debe ser None y MEDIA_URL NO debe definirse 
 # manualmente para que django-storages genere las firmas de seguridad.
 AWS_S3_CUSTOM_DOMAIN = None
+
 # 5. Seguridad y Firmas (Esto genera el token ?X-Amz-Algorithm... en las URLs)
 AWS_QUERYSTRING_AUTH = True  
 AWS_S3_SIGNATURE_VERSION = 's3v4'
