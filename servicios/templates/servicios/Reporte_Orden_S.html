@@ -308,15 +308,15 @@
         <br>
         <table style="margin-top: 10px;">
             <tr>
-                <td width="20%" align="center" valign="bottom">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=Orden-{{ orden.OrdenID }}" width="80" height="80"/>
-
-{% if qr_url %}
-    <img src="{{ qr_url }}" width="80" height="80"/>
-{% else %}
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=Orden-{{ orden.OrdenID }}" width="80" height="80"/>
-{% endif %}
-                </td>
+              <td width="20%" align="center" valign="bottom">
+    {% if qr_url %}
+        {# Si la vista genera un QR personalizado (Base64), usa este #}
+        <img src="{{ qr_url }}" width="80" height="80"/>
+    {% else %}
+        {# Si no, genera uno rápido usando la API externa #}
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=Orden-{{ orden.OrdenID }}" width="80" height="80"/>
+    {% endif %}
+</td>
                 
                 <td width="40%" align="center" valign="bottom">
                     {% if reporte.FirmaTecnico %}
