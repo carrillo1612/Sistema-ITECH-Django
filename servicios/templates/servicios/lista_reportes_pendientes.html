@@ -29,35 +29,14 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Scroll suave en iOS */
-        .smooth-scroll {
-            -webkit-overflow-scrolling: touch;
-        }
+        /* Scroll suave */
+        .smooth-scroll { -webkit-overflow-scrolling: touch; }
 
-        /* Scrollbar personalizada para escritorio */
+        /* Scrollbar personalizada */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        /* Estilos para el Sidebar Móvil */
-        .sidebar-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 40;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .sidebar-mobile {
-            position: fixed;
-            inset-y: 0;
-            left: 0;
-            width: 256px;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-out;
-            z-index: 50;
-        }
     </style>
 </head>
 
@@ -92,9 +71,9 @@
 
     <div class="flex flex-1 overflow-hidden relative">
         
-        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden transition-opacity opacity-0" onclick="toggleSidebar()"></div>
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden transition-opacity duration-300 opacity-0" onclick="toggleSidebar()"></div>
 
-        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex-col shadow-xl z-40 transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static lg:flex h-[100dvh] lg:h-auto shrink-0">
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl z-40 transform -translate-x-full transition-transform duration-300 lg:translate-x-0 lg:static shrink-0">
             <div class="p-6 overflow-y-auto flex-1">
                 <div class="flex justify-between items-center mb-6 lg:hidden">
                     <span class="text-white font-bold text-lg">Menú</span>
@@ -105,19 +84,17 @@
 
                 <p class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4 hidden lg:block">Menú Principal</p>
                 <nav class="space-y-1">
-                    <a href="{% url 'vista_calendario' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
-                        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
+                    <a href="{% url 'vista_calendario' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-all group">
+                        <i class="fas fa-calendar-alt w-5 text-center group-hover:text-accent transition-colors"></i> Calendario
                     </a>
                     
                     <a href="{% url 'lista_ordenes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
                         <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
                     </a>
 
-                    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
-                    <a href="{% url 'lista_reportes_pendientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
-                        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
+                    <a href="{% url 'lista_reportes_pendientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
+                        <i class="fas fa-tools w-5 text-center text-accent transition-colors"></i> Generar Reporte
                     </a>
-                    {% endif %}
 
                     {% if request.user.Rol == 'Administrador' %}
                     <a href="{% url 'lista_clientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
@@ -127,6 +104,16 @@
                         <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
                     </a>
                     {% endif %}
+
+                    <div class="pt-4 mt-4 border-t border-slate-800">
+                        <form action="{% url 'logout' %}" method="post" class="w-full">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-all group">
+                                <i class="fas fa-sign-out-alt w-5 text-center group-hover:scale-110 transition-transform"></i> 
+                                <span class="font-medium text-sm">Cerrar Sesión</span>
+                            </button>
+                        </form>
+                    </div>
                 </nav>
             </div>
             <div class="mt-auto p-6 border-t border-slate-800 shrink-0">
@@ -147,7 +134,6 @@
             </div>
 
             <div class="flex-1 p-4 sm:p-6 sm:px-8 pt-2 overflow-y-auto smooth-scroll custom-scrollbar pb-24">
-                
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden mb-6">
                     
                     <div class="p-4 border-b border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -159,8 +145,7 @@
                                 <input type="text" name="q" value="{{ search_query }}" placeholder="Buscar orden..." class="pl-10 pr-4 py-2 w-full border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-accent/20 focus:border-accent focus:outline-none transition-all">
                             </form>
                         </div>
-                        <div class="text-xs text-slate-500 font-medium w-full sm:w-auto text-left sm:text-right">
-                            {% comment %} Se ajustó la clase w-full a text-left para mejor lectura en móvil {% endcomment %}
+                        <div class="text-xs text-slate-500 font-medium text-left sm:text-right">
                             {{ ordenes_pendientes|length }} órdenes pendientes
                         </div>
                     </div>
@@ -179,9 +164,7 @@
                             <tbody class="divide-y divide-slate-200">
                                 {% for orden in ordenes_pendientes %}
                                 <tr class="hover:bg-slate-50 transition-colors">
-                                    <td class="px-4 sm:px-6 py-4 font-bold text-slate-800 whitespace-nowrap">
-                                        {{ orden.OrdenID }}
-                                    </td>
+                                    <td class="px-4 sm:px-6 py-4 font-bold text-slate-800 whitespace-nowrap">{{ orden.OrdenID }}</td>
                                     <td class="px-4 sm:px-6 py-4">
                                         <div class="font-medium text-slate-900 truncate max-w-[150px] sm:max-w-none">{{ orden.ClienteEmpresa.NombreComercial }}</div>
                                         <div class="text-xs text-slate-400 mt-0.5 truncate max-w-[150px] sm:max-w-none">{{ orden.Servicio|default:"" }}</div>
@@ -199,7 +182,7 @@
                                         </span>
                                     </td>
                                     <td class="px-4 sm:px-6 py-4 text-center whitespace-nowrap">
-                                        <a href="{% url 'registro_temp' orden.pk %}" class="inline-flex items-center px-3 py-2 bg-accent text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md active:bg-blue-800">
+                                        <a href="{% url 'registro_temp' orden.pk %}" class="inline-flex items-center px-3 py-2 bg-accent text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
                                             <i class="fas fa-tools mr-1.5"></i> <span class="hidden sm:inline">Generar</span>
                                         </a>
                                     </td>
@@ -208,11 +191,11 @@
                                 <tr>
                                     <td colspan="5" class="px-6 py-12 text-center text-slate-500">
                                         <div class="flex flex-col items-center justify-center">
-                                            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3 text-slate-300">
-                                                <i class="fas fa-check-circle text-2xl sm:text-3xl"></i>
+                                            <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-3 text-slate-300">
+                                                <i class="fas fa-check-circle text-2xl"></i>
                                             </div>
-                                            <p class="font-medium">¡Al día!</p>
-                                            <p class="text-xs sm:text-sm">No hay reportes pendientes.</p>
+                                            <p class="font-medium">¡Todo listo!</p>
+                                            <p class="text-xs">No hay reportes pendientes.</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -221,42 +204,42 @@
                         </table>
                     </div>
                 </div>
-                
-                <div class="h-8 lg:hidden"></div>
-
             </div>
         </main>
     </div>
 
     <script>
-        const btnMenu = document.getElementById('mobile-menu-btn');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        const btnCloseSidebar = document.getElementById('close-sidebar-btn');
-
-        // Función global para manejar el menú
         function toggleSidebar() {
-            const isClosed = sidebar.classList.contains('-translate-x-full');
-            if (isClosed) {
-                // Abrir
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const isHidden = sidebar.classList.contains('-translate-x-full');
+
+            if (isHidden) {
+                // ABRIR
                 sidebar.classList.remove('-translate-x-full');
                 overlay.classList.remove('hidden');
-                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    overlay.classList.add('opacity-100');
+                }, 10);
             } else {
-                // Cerrar
+                // CERRAR
                 sidebar.classList.add('-translate-x-full');
+                overlay.classList.remove('opacity-100');
                 overlay.classList.add('opacity-0');
                 setTimeout(() => overlay.classList.add('hidden'), 300);
             }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Asegúrate de que los botones llamen a la función correcta (que es 'toggleSidebar')
-            btnMenu.addEventListener('click', toggleSidebar);
-            btnCloseSidebar.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', toggleSidebar);
+            const btnMenu = document.getElementById('mobile-menu-btn');
+            const overlay = document.getElementById('sidebar-overlay');
+            const btnCloseSidebar = document.getElementById('close-sidebar-btn');
+
+            if(btnMenu) btnMenu.onclick = toggleSidebar;
+            if(btnCloseSidebar) btnCloseSidebar.onclick = toggleSidebar;
+            if(overlay) overlay.onclick = toggleSidebar;
         });
     </script>
-
 </body>
 </html>
