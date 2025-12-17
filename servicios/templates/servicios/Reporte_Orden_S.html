@@ -308,13 +308,13 @@
         <br>
         <table style="margin-top: 10px;">
             <tr>
-              <td width="20%" align="center" valign="bottom">
+    <td width="20%" align="center" valign="bottom">
     {% if qr_url %}
-        {# Si la vista genera un QR personalizado (Base64), usa este #}
+        {# Si usas el QR generado en el backend (Base64) #}
         <img src="{{ qr_url }}" width="80" height="80"/>
     {% else %}
-        {# Si no, genera uno rápido usando la API externa #}
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=Orden-{{ orden.OrdenID }}" width="80" height="80"/>
+        {# Generamos un link directo a tu servidor de Render #}
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://sistema-itech-app.onrender.com/reporte/ver/{{ orden.OrdenID }}/" width="80" height="80"/>
     {% endif %}
 </td>
                 

@@ -95,32 +95,34 @@
 
 <body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden font-sans">
 
-<nav class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm z-20 shrink-0">
-        <div class="flex items-center gap-4">
-            <button id="mobile-menu-btn" onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-500 hover:text-accent">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-            
-            <div class="flex items-center gap-2">
-                <img src="{% static 'img/logo.jpeg' %}" alt="Logo" class="h-8 w-auto object-contain">
-                <span class="font-bold text-xl tracking-tight text-slate-900">ITECH</span>
-            </div>
-            <div class="hidden md:flex h-6 w-px bg-slate-300 mx-2"></div>
-            <span class="hidden md:block text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">
-                <i class="fas fa-headset mr-1"></i> Soporte: +52 999 456 7891
-            </span>
-        </div>
+<nav class="space-y-1">
+    {# 1. CALENDARIO: Visible para todos #}
+    <a href="{% url 'vista_calendario' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white border-r-4 border-accent transition-all group">
+        <i class="fas fa-calendar-alt w-5 text-center text-accent transition-colors"></i> Calendario
+    </a>
+    
+    {# 2. ÓRDENES: Visible para todos #}
+    <a href="{% url 'lista_ordenes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-file-invoice w-5 text-center group-hover:text-accent transition-colors"></i> Órdenes
+    </a>
 
-        <div class="flex items-center gap-3">
-            <div class="text-right hidden sm:block">
-                <p class="text-sm font-semibold text-slate-700">{{ user.Nombre }} {{ user.Apellido }}</p>
-                <p class="text-xs text-slate-500">{{ user.Rol }}</p>
-            </div>
-            <div class="h-10 w-10 bg-accent/10 rounded-full flex items-center justify-center text-accent font-bold border border-accent/20">
-                {{ user.Nombre|slice:":1" }}{{ user.Apellido|slice:":1" }}
-            </div>
-        </div>
-    </nav>
+    {# 3. GENERAR REPORTE: Visible para Administrador y Técnico #}
+    {% if request.user.Rol == 'Administrador' or request.user.Rol == 'Técnico' %}
+    <a href="{% url 'lista_reportes_pendientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-tools w-5 text-center group-hover:text-accent transition-colors"></i> Generar Reporte
+    </a>
+    {% endif %}
+
+    {# 4. CLIENTES Y USUARIOS: SOLO visible para el Administrador #}
+    {% if request.user.Rol == 'Administrador' %}
+    <a href="{% url 'lista_clientes' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-users w-5 text-center group-hover:text-accent transition-colors"></i> Clientes
+    </a>
+    <a href="{% url 'gestion_usuarios' %}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-all group">
+        <i class="fas fa-user-cog w-5 text-center group-hover:text-accent transition-colors"></i> Usuarios
+    </a>
+    {% endif %}
+</nav>
 
     <div class="flex flex-1 overflow-hidden">
         
@@ -362,8 +364,8 @@
                                                 </tr>
                                                 <tr class="hover:bg-white transition-colors">
                                                     <td class="px-4 sm:px-6 py-3 font-medium text-slate-900">Amperaje Compresor</td>
-                                                    <td class="px-4 sm:px-6 py-2"><input type="number" step="0.1" id="ampCompOriginal" name="ampCompOriginal" placeholder="FLA" required class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
-                                                    <td class="px-4 sm:px-6 py-2"><input type="number" step="0.1" id="ampCompActual" name="ampCompActual" placeholder="A" class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
+                                                    <td class="px-4 sm:px-6 py-2"><input type="text" step="0.1" id="ampCompOriginal" name="ampCompOriginal" placeholder="FLA" required class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
+                                                    <td class="px-4 sm:px-6 py-2"><input type="text" step="0.1" id="ampCompActual" name="ampCompActual" placeholder="A" class="w-full bg-transparent border-b border-slate-300 focus:border-accent focus:outline-none py-1"></td>
                                                 </tr>
                                                 <tr class="hover:bg-white transition-colors">
                                                     <td class="px-4 sm:px-6 py-3 font-medium text-slate-900">Sensor de Pozo</td>
