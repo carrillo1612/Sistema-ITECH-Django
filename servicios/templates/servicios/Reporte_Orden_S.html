@@ -347,17 +347,17 @@
         {% for foto in fotos|slice:":12" %} <td class="evidence-cell" valign="top">
                 
                 <div class="image-box">
-                    
-                    {% if foto.Imagen %}
-                        <img src="{{ foto.Imagen.url }}" class="evidence-img" />
-                    {% else %}
-                        <div style="width: 100%; height: 80px; background-color: #eee; color: #aaa; text-align: center; line-height: 80px; font-size: 8pt;">Sin Imagen</div>
-                    {% endif %}
+    {% if foto.Imagen %}
+        {# Usamos la URL absoluta para que el PDF sepa que debe ir a S3 #}
+        <img src="{{ foto.Imagen.url }}" class="evidence-img" />
+    {% else %}
+        <div style="width: 100%; height: 80px; background-color: #eee; color: #aaa; text-align: center; line-height: 80px; font-size: 8pt;">Sin Imagen</div>
+    {% endif %}
 
-                    <div class="evidence-caption">
-                        <b>{{ forloop.counter }}.</b> {{ foto.Descripcion|default:"Evidencia del servicio" }}
-                    </div>
-                </div>
+    <div class="evidence-caption">
+        <b>{{ forloop.counter }}.</b> {{ foto.Descripcion|default:"Evidencia del servicio" }}
+    </div>
+</div>
 
             </td>
             

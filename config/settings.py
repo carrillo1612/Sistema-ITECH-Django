@@ -126,7 +126,8 @@ AWS_QUERYSTRING_AUTH = True
 AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None # Usamos permisos privados porque la firma autoriza el acceso
-
+# AÑADE ESTA LÍNEA:
+AWS_S3_URL_PROTOCOL = 'https'
 # =========================================================================
 
 TELEGRAM_BOT_TOKEN = '8205329300:AAHPQG-YuMIcrwM3a2bNgWUa2SdpLdFlQIw' 
